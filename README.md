@@ -5,7 +5,8 @@ One HTML file. No install, no server, 100% offline. Your vault lives only in you
 ## Quick Start
 1. Double-click `LocalVault.html` (Chrome / Edge / Firefox / Safari).
 2. Create vault → choose a master password (min 12 chars) → remember it.
-3. Unlock with that password each time you reopen.
+3. **Save the recovery key** that is shown after creation (copy, print, or download .txt).
+4. Unlock with that password each time you reopen.
 
 ## How to Use
 - **Add:** Top-right `+ Add` → choose Login / Card / Identity / Note.
@@ -25,10 +26,19 @@ One HTML file. No install, no server, 100% offline. Your vault lives only in you
 - **Export (decrypted):** Sidebar Export → JSON/CSV/Excel or `Copy JSON` (copies to clipboard). Keep decrypted exports safe — delete after use.
 - **Automatic:** Settings → Automatic weekly backup (on by default) keeps last 4 encrypted snapshots locally. Banner reminds you to download.
 
+## 🔑 Recovery Key (Forgot Master Password?)
+When you create the vault, a **recovery key** is shown once. It is your only way to reset a forgotten master password **without losing your data**.
+
+- **Save it offline** — print it, copy to a USB stick, or download the .txt. Store it somewhere safe but not tied to the browser.
+- **To use it:** On the lock screen click **“Use recovery key”** → enter the key → set a new master password. Your existing entries are preserved and re-encrypted.
+- **Anyone with the key can unlock your vault** — treat it like a password.
+- **Changing your master password or security level invalidates the old key.** A new one must be generated (Settings → Recovery key → Generate).
+- **If you lost the key AND forget the password:** the vault cannot be recovered. You must delete and start over (or restore from an encrypted backup file).
+
 ## Limitations — Read This
 - **No sync:** Vault is tied to `origin + browser profile` (localStorage). 2 devices/browsers = 2 separate vaults. Merge via export/import.
-- **No password reset:** Forgot master password = vault lost forever. No recovery.
-- **Clearing browser data** (cookies/cache) erases vault. Keep an encrypted backup.
+- **No recovery without the key:** Recovery only works if you saved the recovery key. No email / phone reset exists (nothing to contact — it's fully offline).
+- **Clearing browser data** (cookies/cache) erases the vault AND the stored recovery key. Keep an encrypted backup + your recovery key.
 - **Incognito/private** wipes on close.
 - **`file://` vs hosted `https://`** are different origins — vault does not carry over.
 - **No cloud:** File never contacts internet. You are responsible for backups.

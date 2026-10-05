@@ -386,7 +386,7 @@ body.dark .switch .sw{background:#475569}
     <!-- create -->
     <div id="createBox" class="hidden">
       <h2>Create your vault</h2>
-      <p class="sub">Choose a strong master password — you'll need it every time to unlock. It is never stored anywhere.</p>
+      <p class="sub">Choose a strong master password — you'll need it every time to unlock. You'll also get a <b>recovery key</b> to reset it if you ever forget.</p>
       <label>Master password <span class="req">*</span></label>
       <div class="pw-wrap"><input id="newPass" type="password" placeholder="Choose a strong master password" autocomplete="new-password" /><button class="pw-eye" data-eye="newPass" data-icon="eye" title="Show/hide"></button></div>
       <div class="strength"><i id="newPassBar"></i></div>
@@ -408,7 +408,7 @@ body.dark .switch .sw{background:#475569}
       <div class="pw-wrap"><input id="unlockPass" type="password" placeholder="Enter master password" autocomplete="current-password" /><button class="pw-eye" data-eye="unlockPass" data-icon="eye" title="Show/hide"></button></div>
       <div id="capsWarn">⚐️ Caps Lock is ON</div>
       <button class="btn btn-primary" id="unlockBtn">Unlock</button>
-      <div class="lock-links"><span>Enter ↵ also unlocks</span><button id="wipeBtn">Delete vault &amp; start over</button></div>
+      <div class="lock-links"><span>Enter ↵ also unlocks</span><span style="display:flex;gap:12px"><button id="recBtn">Use recovery key</button><button id="wipeBtn">Delete vault &amp; start over</button></span></div>
     </div>
   </div>
   <p class="lw-swap" id="lwSwap"></p>
@@ -542,6 +542,11 @@ body.dark .switch .sw{background:#475569}
   <div class="row2"><div><select id="kdfSel"><option value="300000">Standard</option><option value="600000">High (recommended)</option><option value="1000000">Maximum</option></select></div><div><input id="kdfPass" type="password" placeholder="Current master password" /></div></div>
   <button class="btn btn-ghost" id="kdfBtn">Update security level</button>
   </div>
+  <div class="set-sec" id="recSetSec"><h4>Recovery key</h4>
+  <p class="hint" id="recStatus" style="margin:4px 0 8px"></p>
+  <div class="row2"><button class="btn btn-ghost" id="genRecBtn">Generate recovery key</button><button class="btn btn-ghost hidden" id="copyRecBtn">Copy key</button><button class="btn btn-ghost hidden" id="delRecBtn">Delete key</button></div>
+  <p class="hint" style="margin-top:6px">If you forget the master password, this key can reset it. Store it offline (print or USB). Anyone with it can unlock your vault.</p>
+  </div>
   <div class="set-sec"><div class="danger-card">
   <button class="btn btn-danger" id="delVaultBtn">Delete vault (type DELETE to confirm)</button>
   </div></div>
@@ -572,6 +577,22 @@ body.dark .switch .sw{background:#475569}
   <div class="actions"><button class="btn btn-primary" id="impMerge">Merge</button><button class="btn btn-ghost" id="impCancel">Cancel</button></div>
 </div></div>
 
+<!-- RECOVERY: created once + use on lock screen -->
+<div id="recCreatedModal" class="overlay hidden"><div class="modal" style="max-width:560px">
+  <h3>Recovery key — save this now</h3>
+  <p class="hint" style="color:#b91c1c">This is shown <b>once</b>. If you lose it and forget your master password, your vault cannot be recovered.</p>
+  <div id="recDisplay" style="font-family:ui-monospace,monospace;font-size:13px;line-height:1.6;letter-spacing:.04em;background:#f8fafc;border:1px solid #dfe5ee;border-radius:8px;padding:12px;word-break:break-all;user-select:all"></div>
+  <div class="actions" style="justify-content:space-between"><span style="display:flex;gap:8px"><button class="btn btn-ghost" id="recCopyBtn">Copy</button><button class="btn btn-ghost" id="recPrintBtn">Print</button><button class="btn btn-ghost" id="recDownloadBtn">Download .txt</button></span><button class="btn btn-primary" id="recCreatedOk">I have saved it</button></div>
+</div></div>
+<div id="recModal" class="overlay hidden"><div class="modal" style="max-width:520px">
+  <h3>Reset with recovery key</h3>
+  <p class="hint">Enter your recovery key, then choose a new master password. Your vault data will be preserved.</p>
+  <label>Recovery key</label><textarea id="recInp" placeholder="XXXX-XXXX-..." style="min-height:72px;font-family:ui-monospace,monospace;font-size:13px"></textarea>
+  <label style="margin-top:10px">New master password (min 12 chars)</label><input id="recNewPass" type="password" placeholder="New master password" />
+  <input id="recNewPass2" type="password" placeholder="Confirm" style="margin-top:8px" />
+  <p class="hint" id="recMsg" style="min-height:18px"></p>
+  <div class="actions"><button class="btn btn-primary" id="recDoBtn">Reset password</button><button class="btn btn-ghost" id="recCloseBtn">Cancel</button></div>
+</div></div>
 <div id="toast" class="hidden"></div>
 
 <script>
@@ -644,7 +665,7 @@ async function decryptVault(key,blob){
 }
 
 /* ============ storage (local only) ============ */
-const LS_BLOB='localvault.blob.v1', LS_META='localvault.meta.v1';
+const LS_BLOB='localvault.blob.v1', LS_META='localvault.meta.v1', LS_REC='localvault.recovery.v1';
 const loadBlob=()=>{try{return JSON.parse(localStorage.getItem(LS_BLOB));}catch{return null;}};
 const saveBlob=b=>localStorage.setItem(LS_BLOB,JSON.stringify(b));
 const loadMeta=()=>{try{return JSON.parse(localStorage.getItem(LS_META))||{};}catch{return{};}};
@@ -654,6 +675,32 @@ const saveMeta=m=>localStorage.setItem(LS_META,JSON.stringify(m));
    The raw key lives in sessionStorage (same-origin, per-tab). Refresh keeps you in;
    Lock / Log out / closing the tab wipes it and the master password is required again. */
 const LS_SESS='localvault.session.v1';
+/* ============ recovery key (offline, zero-knowledge) ============
+   Code is 32 random bytes (256-bit) shown as 16x4 hex groups. It encrypts
+   the raw MASTER_KEY with AES-GCM and stores {iv,data} in LS_REC. On forgot,
+   the code decrypts LS_REC to recover MASTER_KEY, then lets user set a new
+   password and re-encrypts the vault. Changing password/iterations invalidates
+   the recovery blob (must regenerate). */
+function genRecoveryCode(){
+  const b=crypto.getRandomValues(new Uint8Array(32));
+  const hex=[...b].map(x=>x.toString(16).padStart(2,'0')).join('').toUpperCase();
+  return hex.match(/.{4}/g).join('-');
+}
+async function importRecoveryKey(code){
+  const hex=code.replace(/[^0-9a-fA-F]/g,'');
+  if(hex.length!==64) throw new Error('Recovery code must be 64 hex characters (16 groups)');
+  const bytes=Uint8Array.from(hex.match(/.{2}/g).map(h=>parseInt(h,16)));
+  return crypto.subtle.importKey('raw',bytes,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function storeRecovery(code){
+  const rkey=await importRecoveryKey(code);
+  const raw=await crypto.subtle.exportKey('raw',MASTER_KEY);
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},rkey,raw);
+  localStorage.setItem(LS_REC,JSON.stringify({iv:b64e(iv),data:b64e(ct),createdAt:Date.now()}));
+}
+function hasRecovery(){try{return !!JSON.parse(localStorage.getItem(LS_REC))?.data;}catch{return false;}}
+function clearRecovery(){localStorage.removeItem(LS_REC);}
 async function saveSession(key,salt,iterations){
   try{
     const raw=await crypto.subtle.exportKey('raw',key);
@@ -704,6 +751,16 @@ document.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{const i=$(b.da
 });
 $('ePass').addEventListener('input',e=>paintBar($('ePassBar'),e.target.value));
 
+let _pendingRecCode=null;
+function showRecoveryCreated(code){
+  _pendingRecCode=code;
+  $('recDisplay').textContent=code;
+  $('recCreatedModal').classList.remove('hidden');
+}
+$('recCopyBtn').onclick=async()=>{ if(_pendingRecCode){ try{await navigator.clipboard.writeText(_pendingRecCode);}catch{copyText(_pendingRecCode,0);} toast('Recovery key copied'); } };
+$('recPrintBtn').onclick=()=>{ const w=window.open('','_blank'); if(!w)return toast('Pop-up blocked'); w.document.write('<pre style="font-family:monospace;white-space:pre-wrap;word-break:break-all;padding:24px">'+esc(_pendingRecCode)+'<br><br>LocalVault recovery key — store offline. Anyone with this can reset your master password.</pre>'); w.document.close(); w.print(); };
+$('recDownloadBtn').onclick=()=>{ if(!_pendingRecCode)return; downloadBlob(new Blob([_pendingRecCode+'\n\nLocalVault recovery key — store offline. Anyone with this can reset your master password.\nCreated '+new Date().toISOString()+'\n'],{type:'text/plain'}),'LocalVault-recovery-key.txt'); toast('Downloaded'); };
+$('recCreatedOk').onclick=()=>{ $('recCreatedModal').classList.add('hidden'); _pendingRecCode=null; enterApp(); toast('Vault created — recovery key saved locally'); };
 $('createBtn').onclick=async()=>{
   const p1=$('newPass').value,p2=$('newPass2').value,iters=parseInt($('iterSel').value);
   const msg=$('lockMsg');msg.innerHTML='';
@@ -717,7 +774,12 @@ $('createBtn').onclick=async()=>{
     const enc=await encryptVault(key,VAULT);
     saveBlob({salt,iterations:iters,...enc,updatedAt:Date.now()});
     saveMeta({hint:$('hintInp').value.trim(),createdAt:Date.now()});
-    MASTER_KEY=key;saveSession(key,salt,iters);enterApp();toast('Vault created');
+    MASTER_KEY=key;saveSession(key,salt,iters);
+    const code=genRecoveryCode();
+    await storeRecovery(code);
+    $('createBtn').disabled=false;$('createBtn').textContent='Create vault';
+    showRecoveryCreated(code);
+    return;
   }catch(e){msg.innerHTML='<div class="err">Failed: '+esc(e.message)+'</div>';}
   $('createBtn').disabled=false;$('createBtn').textContent='Create vault';
 };
@@ -735,7 +797,43 @@ async function tryUnlock(){
 }
 $('unlockBtn').onclick=tryUnlock;
 $('unlockPass').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock();});
-$('wipeBtn').onclick=()=>{if(prompt('Delete ALL local vault data? Type DELETE to confirm:')==='DELETE'){localStorage.removeItem(LS_BLOB);localStorage.removeItem(LS_META);location.reload();}};
+$('wipeBtn').onclick=()=>{if(prompt('Delete ALL local vault data? Type DELETE to confirm:')==='DELETE'){localStorage.removeItem(LS_BLOB);localStorage.removeItem(LS_META);localStorage.removeItem(LS_REC);localStorage.removeItem(LS_AUTO);sessionStorage.clear();location.reload();}};
+$('recBtn').onclick=()=>{
+  if(!loadBlob()) return toast('No vault yet — create one first');
+  if(!hasRecovery()){ $('recMsg').textContent='No recovery key found for this vault. If you never saved one, you must delete and start over.'; $('recMsg').style.color='#b91c1c'; }
+  else { $('recMsg').textContent=''; $('recMsg').style.color=''; }
+  $('recInp').value='';$('recNewPass').value='';$('recNewPass2').value='';
+  $('recModal').classList.remove('hidden');$('recInp').focus();
+};
+$('recCloseBtn').onclick=()=>$('recModal').classList.add('hidden');
+$('recDoBtn').onclick=async()=>{
+  const code=$('recInp').value.trim(), np=$('recNewPass').value, np2=$('recNewPass2').value;
+  const m=$('recMsg'); m.textContent=''; m.style.color='';
+  if(!code) return m.textContent='Enter recovery key';
+  if(np.length<12||scorePass(np)<40) return m.textContent='New password too weak — min 12 chars with mixed types';
+  if(np!==np2) return m.textContent='Passwords do not match';
+  $('recDoBtn').disabled=true; m.textContent='Verifying…';
+  try{
+    const rec=JSON.parse(localStorage.getItem(LS_REC));
+    if(!rec?.data) throw new Error('No recovery key stored for this vault');
+    const rkey=await importRecoveryKey(code);
+    const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(rec.iv)},rkey,b64d(rec.data));
+    const oldKey=await crypto.subtle.importKey('raw',raw,{name:'AES-GCM',length:256},true,['encrypt','decrypt']);
+    const blob=loadBlob();
+    VAULT=await decryptVault(oldKey,blob);
+    VAULT.entries=VAULT.entries||[];VAULT.folders=VAULT.folders||[];
+    const salt=b64e(crypto.getRandomValues(new Uint8Array(16)));
+    const iters=blob.iterations||600000;
+    MASTER_KEY=await deriveKey(np,salt,iters);
+    const enc=await encryptVault(MASTER_KEY,VAULT);
+    saveBlob({salt,iterations:iters,...enc,updatedAt:Date.now()});
+    await storeRecovery(code);
+    saveSession(MASTER_KEY,salt,iters);
+    $('recModal').classList.add('hidden');
+    META=loadMeta(); enterApp(); toast('Password reset via recovery key');
+  }catch(e){ m.textContent='Failed: '+(e.message||'wrong recovery key'); m.style.color='#b91c1c'; }
+  $('recDoBtn').disabled=false;
+};
 
 async function persist(){
   const blob=loadBlob();
@@ -1211,7 +1309,25 @@ async function restoreAutoSlot(i){
 }
 
 /* ============ settings: export CSV/Excel/JSON, import, change, delete ============ */
-$('settingsBtn').onclick=()=>{refreshBackupLine();renderAutoSettings();const b=loadBlob();if(b)$('kdfCur').textContent=secName(b.iterations);$('setModal').classList.remove('hidden');};
+function refreshRecStatus(){
+  const has=hasRecovery();
+  const el=$('recStatus');
+  if(!el) return;
+  if(has){
+    const r=JSON.parse(localStorage.getItem(LS_REC));
+    const d=r?.createdAt?new Date(r.createdAt).toLocaleDateString():'';
+    el.innerHTML='Status: <b style="color:#16a34a">Generated'+(d?' · '+esc(d):'')+'</b> — keep it offline. <span class="hint" style="display:inline">Changing password or security level will invalidate it.</span>';
+    $('copyRecBtn')?.classList.remove('hidden');
+    $('delRecBtn')?.classList.remove('hidden');
+    $('genRecBtn').textContent='Regenerate (old key lost)';
+  } else {
+    el.innerHTML='Status: <b style="color:#b91c1c">Not set</b> — generate one to recover if you forget the master password.';
+    $('copyRecBtn')?.classList.add('hidden');
+    $('delRecBtn')?.classList.add('hidden');
+    $('genRecBtn').textContent='Generate recovery key';
+  }
+}
+$('settingsBtn').onclick=()=>{refreshBackupLine();renderAutoSettings();refreshRecStatus();const b=loadBlob();if(b)$('kdfCur').textContent=secName(b.iterations);$('setModal').classList.remove('hidden');};
 $('setClose').onclick=()=>$('setModal').classList.add('hidden');
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target!==o)return;if(o.id==='entryModal')closeEntryModal();else o.classList.add('hidden');}));
 /* ---- items 2+8: Esc handling, shortcuts (Ctrl+K / Ctrl+N), focus trap, ARIA ---- */
@@ -1385,7 +1501,9 @@ $('chgBtn').onclick=async()=>{
   const enc=await encryptVault(MASTER_KEY,VAULT);
   saveBlob({salt,iterations:iters,...enc,updatedAt:Date.now()});
   saveSession(MASTER_KEY,salt,iters);
-  $('chgPass').value=$('chgPass2').value='';toast('Master password changed');
+  const hadRec=hasRecovery(); if(hadRec) clearRecovery();
+  $('chgPass').value=$('chgPass2').value='';refreshRecStatus();
+  toast(hadRec?'Master password changed — recovery key invalidated, generate a new one':'Master password changed');
 };
 /* ---- item 6: raise PBKDF2 iterations on an existing vault (password-confirmed) ----
    Note: Argon2 deliberately skipped — WebCrypto has no Argon2; bundling WASM would
@@ -1406,9 +1524,30 @@ $('kdfBtn').onclick=async()=>{
     saveBlob({salt,iterations:iters,...enc,updatedAt:Date.now()});
     saveSession(MASTER_KEY,salt,iters);
     $('kdfPass').value='';$('kdfCur').textContent=secName(iters);
-    toast('Security level updated to '+secName(iters));
+    const hadRec2=hasRecovery(); if(hadRec2) clearRecovery();
+    refreshRecStatus();
+    toast(hadRec2?'Security level updated to '+secName(iters)+' — recovery key invalidated':'Security level updated to '+secName(iters));
   }catch{toast('Wrong master password — nothing changed');}
   $('kdfBtn').disabled=false;$('kdfBtn').textContent='Update security level';
+};
+$('genRecBtn').onclick=async()=>{
+  if(hasRecovery() && !confirm('Regenerate recovery key? The old key will stop working — you must save the new one.')) return;
+  const code=genRecoveryCode();
+  await storeRecovery(code);
+  refreshRecStatus();
+  _pendingRecCode=code; $('recDisplay').textContent=code;
+  $('recCreatedModal').classList.remove('hidden');
+  toast('New recovery key generated — save it now');
+};
+$('copyRecBtn').onclick=async()=>{
+  if(_pendingRecCode){ try{await navigator.clipboard.writeText(_pendingRecCode);}catch{copyText(_pendingRecCode,0);} return toast('Recovery key copied'); }
+  toast('Recovery key was shown once — if you did not save it, regenerate a new one');
+};
+$('delRecBtn').onclick=()=>{
+  if(!hasRecovery()) return toast('No recovery key to delete');
+  if(confirm('Delete recovery key? You will not be able to reset via recovery afterwards.')){
+    clearRecovery(); refreshRecStatus(); toast('Recovery key deleted');
+  }
 };
 
 /* ---- item 7: offline password health report (weak / reused / old) ---- */
@@ -1463,7 +1602,7 @@ $('hibpBtn').onclick=async()=>{
   window._breach=found;
   $('hibpBody').querySelectorAll('[data-bre]').forEach(b=>b.onclick=()=>{const f=window._breach[+b.dataset.bre];const o=liveNonTrash().find(e=>e.password===f.pw);if(o){selectedId=o.id;filter='all';folderFilter=null;document.querySelectorAll('.nav-item,.folder-row').forEach(x=>x.classList.remove('active'));document.querySelector('.nav-item').classList.add('active');renderAll();} $('healthModal').classList.add('hidden');});
 };
-$('delVaultBtn').onclick=()=>{if(prompt('Type DELETE to erase the vault on this device:')==='DELETE'){localStorage.removeItem(LS_BLOB);location.reload();}};
+$('delVaultBtn').onclick=()=>{if(prompt('Type DELETE to erase the vault on this device:')==='DELETE'){localStorage.removeItem(LS_BLOB);localStorage.removeItem(LS_META);localStorage.removeItem(LS_REC);localStorage.removeItem(LS_AUTO);sessionStorage.clear();location.reload();}};
 
 boot();
 </script>
