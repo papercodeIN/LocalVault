@@ -531,6 +531,11 @@ body.dark .switch .sw{background:#475569}
   <p class="hint" id="autoStatus"></p>
   <div id="autoList"></div>
   <p class="hint" id="backupLine"></p>
+  <div class="set-sec" id="recSetSec"><h4>Recovery key</h4>
+  <p class="hint" id="recStatus" style="margin:4px 0 8px"></p>
+  <div class="row2"><button class="btn btn-ghost" id="genRecBtn">Generate recovery key</button><button class="btn btn-ghost hidden" id="copyRecBtn">Copy key</button><button class="btn btn-ghost hidden" id="delRecBtn">Delete key</button></div>
+  <p class="hint" style="margin-top:6px">If you forget the master password, this key can reset it. Store it offline (print or USB). Anyone with it can unlock your vault.</p>
+  </div>
   </div><div class="set-col">
   <div class="set-sec"><h4>Master password</h4>
   <label>New password (min 12 characters)</label>
@@ -541,11 +546,6 @@ body.dark .switch .sw{background:#475569}
   <div class="set-sec"><h4>Security level <b id="kdfCur">…</b></h4>
   <div class="row2"><div><select id="kdfSel"><option value="300000">Standard</option><option value="600000">High (recommended)</option><option value="1000000">Maximum</option></select></div><div><input id="kdfPass" type="password" placeholder="Current master password" /></div></div>
   <button class="btn btn-ghost" id="kdfBtn">Update security level</button>
-  </div>
-  <div class="set-sec" id="recSetSec"><h4>Recovery key</h4>
-  <p class="hint" id="recStatus" style="margin:4px 0 8px"></p>
-  <div class="row2"><button class="btn btn-ghost" id="genRecBtn">Generate recovery key</button><button class="btn btn-ghost hidden" id="copyRecBtn">Copy key</button><button class="btn btn-ghost hidden" id="delRecBtn">Delete key</button></div>
-  <p class="hint" style="margin-top:6px">If you forget the master password, this key can reset it. Store it offline (print or USB). Anyone with it can unlock your vault.</p>
   </div>
   <div class="set-sec"><div class="danger-card">
   <button class="btn btn-danger" id="delVaultBtn">Delete vault (type DELETE to confirm)</button>
