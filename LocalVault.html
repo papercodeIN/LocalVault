@@ -17,19 +17,20 @@ button,input,select,textarea{font:inherit}
 .hidden{display:none!important}
 
 /* Lock screen — Bitwarden login style (light) */
-#lockView{min-height:100vh;overflow:auto;background:#f4f6fa;color:#17233b;display:flex;flex-direction:column;align-items:center;padding:24px 20px 48px}
+#lockView{min-height:100vh;overflow:auto;background:#f4f6fa;color:#17233b;display:flex;flex-direction:column;align-items:center;padding:16px 20px 24px}
 .lw-top{align-self:flex-start;display:flex;align-items:center;gap:9px;color:#175ddc}
 .lw-top svg{width:30px;height:34px}
 .lw-top span{font-size:23px;font-weight:300}
 .lw-top b{font-weight:800}
-.lw-safe{margin:30px 0 4px}
-.lw-title{font-size:29px;font-weight:500;margin:8px 0 16px;color:#17233b;text-align:center}
+.lw-safe{margin:10px 0 2px}
+.lw-safe svg{width:88px;height:auto;display:block}
+.lw-title{font-size:24px;font-weight:500;margin:6px 0 12px;color:#17233b;text-align:center}
 #lockMsg{width:100%;max-width:480px}
 #lockMsg .err{background:#fef2f2;border:1px solid #f0b4b4;color:#b91c1c}
-.lw-card{width:100%;max-width:480px;background:#fff;border:1px solid #e3e8f0;border-radius:14px;box-shadow:0 2px 12px rgba(23,35,59,.07);padding:26px}
+.lw-card{width:100%;max-width:480px;background:#fff;border:1px solid #e3e8f0;border-radius:14px;box-shadow:0 2px 12px rgba(23,35,59,.07);padding:20px 22px}
 .lw-card h2{margin:0 0 2px;font-size:17px}
 .lw-card p.sub{color:#5c6b82;font-size:13.5px;margin:0 0 4px;line-height:1.55}
-#lockView label{color:#17233b;text-transform:none;letter-spacing:0;font-size:14px;font-weight:500;margin:14px 0 6px}
+#lockView label{color:#17233b;text-transform:none;letter-spacing:0;font-size:14px;font-weight:500;margin:10px 0 5px}
 #lockView label .req{color:#c81e1e}
 #lockView input[type=text],#lockView input[type=password],#lockView select{background:#fff;border:1.5px solid #9aa8bd;color:#17233b;border-radius:9px}
 #lockView input:focus,#lockView select:focus{border-color:#175ddc}
@@ -47,9 +48,19 @@ button,input,select,textarea{font:inherit}
 .lock-links{display:flex;justify-content:space-between;margin-top:14px;font-size:12.5px;color:#5c6b82}
 .lock-links button{background:none;border:0;color:#5c6b82;cursor:pointer;padding:0;text-decoration:underline}
 .lw-swap{margin:22px 0 0;font-size:14.5px;color:#17233b;text-align:center}
-.lw-trust{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:26px}
+.lw-trust{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px}
 .lw-trust span{font-size:11.5px;color:#5c6b82;border:1px solid #dfe5ee;background:#fff;border-radius:99px;padding:4px 12px}
-.lw-foot{margin-top:12px;font-size:12px;color:#8a97ab;text-align:center}
+.lw-foot{margin-top:8px;font-size:12px;color:#8a97ab;text-align:center}
+/* Short viewports: hide decoration so the form + button fit without scrolling */
+@media(max-height:800px){
+  .lw-safe{display:none}
+  .lw-foot{display:none}
+  .lw-title{font-size:22px;margin:4px 0 10px}
+  .lw-trust{margin-top:10px}
+  .lw-card{padding:16px 18px}
+  #lockView label{margin:8px 0 4px}
+  .lock-links{margin-top:10px}
+}
 /* SVG icon buttons */
 .eicon svg,.iconbtn svg{display:block;width:18px;height:18px}
 .eicon{display:inline-flex;align-items:center;justify-content:center}
@@ -669,7 +680,36 @@ const LS_BLOB='localvault.blob.v1', LS_META='localvault.meta.v1', LS_REC='localv
 const loadBlob=()=>{try{return JSON.parse(localStorage.getItem(LS_BLOB));}catch{return null;}};
 const saveBlob=b=>localStorage.setItem(LS_BLOB,JSON.stringify(b));
 const loadMeta=()=>{try{return JSON.parse(localStorage.getItem(LS_META))||{};}catch{return{};}};
-const saveMeta=m=>localStorage.setItem(LS_META,JSON.stringify(m));
+const saveMeta=m=>{localStorage.setItem(LS_META,JSON.stringify(m));serverPush();};
+
+/* ---- server-backed encrypted storage (self-hosted mode only) ----
+   Under file:// everything stays in localStorage as before. When served
+   over http(s) by selfhosted/server.js, the already-encrypted blob + meta
+   + recovery blob are mirrored to vault.store.json on local disk (loopback).
+   The server never sees plaintext — it stores the same ciphertext. */
+const USE_SERVER=(typeof location!=='undefined')&&String(location.protocol||'').startsWith('http');
+async function serverPush(){
+  if(!USE_SERVER)return;
+  try{
+    await fetch('/api/store',{method:'PUT',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({blob:localStorage.getItem(LS_BLOB),meta:localStorage.getItem(LS_META),rec:localStorage.getItem(LS_REC)})});
+  }catch{}
+}
+async function serverPull(){
+  if(!USE_SERVER)return;
+  try{
+    const r=await fetch('/api/store',{cache:'no-store'});
+    if(!r.ok)return;
+    const s=await r.json();
+    if(!s||typeof s!=='object')return;
+    const j=p=>{try{return p?JSON.parse(p):null;}catch{return null;}};
+    const lb=j(localStorage.getItem(LS_BLOB)),sb=j(s.blob);
+    if(sb&&sb.salt&&sb.data&&(!lb||(sb.updatedAt||0)>=(lb.updatedAt||0)))localStorage.setItem(LS_BLOB,s.blob);
+    if(s.meta&&!localStorage.getItem(LS_META))localStorage.setItem(LS_META,s.meta);
+    const lr=j(localStorage.getItem(LS_REC)),sr=j(s.rec);
+    if(sr&&sr.data&&(!lr||(sr.createdAt||0)>(lr.createdAt||0)))localStorage.setItem(LS_REC,s.rec);
+  }catch{}
+}
 
 /* ============ session: survive page refresh (cleared on lock/logout/tab close) ============
    The raw key lives in sessionStorage (same-origin, per-tab). Refresh keeps you in;
@@ -698,9 +738,10 @@ async function storeRecovery(code){
   const iv=crypto.getRandomValues(new Uint8Array(12));
   const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},rkey,raw);
   localStorage.setItem(LS_REC,JSON.stringify({iv:b64e(iv),data:b64e(ct),createdAt:Date.now()}));
+  serverPush();
 }
 function hasRecovery(){try{return !!JSON.parse(localStorage.getItem(LS_REC))?.data;}catch{return false;}}
-function clearRecovery(){localStorage.removeItem(LS_REC);}
+function clearRecovery(){localStorage.removeItem(LS_REC);serverPush();}
 async function saveSession(key,salt,iterations){
   try{
     const raw=await crypto.subtle.exportKey('raw',key);
@@ -709,6 +750,7 @@ async function saveSession(key,salt,iterations){
 }
 function clearSession(){try{sessionStorage.removeItem(LS_SESS);}catch{}}
 async function boot(){
+  await serverPull();
   refreshLock();
   try{
     const blob=loadBlob(),s=JSON.parse(sessionStorage.getItem(LS_SESS));
@@ -797,7 +839,7 @@ async function tryUnlock(){
 }
 $('unlockBtn').onclick=tryUnlock;
 $('unlockPass').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock();});
-$('wipeBtn').onclick=()=>{if(prompt('Delete ALL local vault data? Type DELETE to confirm:')==='DELETE'){localStorage.removeItem(LS_BLOB);localStorage.removeItem(LS_META);localStorage.removeItem(LS_REC);localStorage.removeItem(LS_AUTO);sessionStorage.clear();location.reload();}};
+$('wipeBtn').onclick=async()=>{if(prompt('Delete ALL local vault data? Type DELETE to confirm:')==='DELETE'){localStorage.removeItem(LS_BLOB);localStorage.removeItem(LS_META);localStorage.removeItem(LS_REC);localStorage.removeItem(LS_AUTO);sessionStorage.clear();await serverPush();location.reload();}};
 $('recBtn').onclick=()=>{
   if(!loadBlob()) return toast('No vault yet — create one first');
   if(!hasRecovery()){ $('recMsg').textContent='No recovery key found for this vault. If you never saved one, you must delete and start over.'; $('recMsg').style.color='#b91c1c'; }
@@ -839,6 +881,7 @@ async function persist(){
   const blob=loadBlob();
   const enc=await encryptVault(MASTER_KEY,VAULT);
   saveBlob({salt:blob.salt,iterations:blob.iterations,...enc,updatedAt:Date.now()});
+  serverPush();
 }
 
 /* ============ app shell ============ */
@@ -1602,7 +1645,7 @@ $('hibpBtn').onclick=async()=>{
   window._breach=found;
   $('hibpBody').querySelectorAll('[data-bre]').forEach(b=>b.onclick=()=>{const f=window._breach[+b.dataset.bre];const o=liveNonTrash().find(e=>e.password===f.pw);if(o){selectedId=o.id;filter='all';folderFilter=null;document.querySelectorAll('.nav-item,.folder-row').forEach(x=>x.classList.remove('active'));document.querySelector('.nav-item').classList.add('active');renderAll();} $('healthModal').classList.add('hidden');});
 };
-$('delVaultBtn').onclick=()=>{if(prompt('Type DELETE to erase the vault on this device:')==='DELETE'){localStorage.removeItem(LS_BLOB);localStorage.removeItem(LS_META);localStorage.removeItem(LS_REC);localStorage.removeItem(LS_AUTO);sessionStorage.clear();location.reload();}};
+$('delVaultBtn').onclick=async()=>{if(prompt('Type DELETE to erase the vault on this device:')==='DELETE'){localStorage.removeItem(LS_BLOB);localStorage.removeItem(LS_META);localStorage.removeItem(LS_REC);localStorage.removeItem(LS_AUTO);sessionStorage.clear();await serverPush();location.reload();}};
 
 boot();
 </script>
