@@ -75,15 +75,12 @@ Your browser treats the server address as a *new home*, so the old vault doesn't
 
 ## ⚠️ Honest limitations
 
-What this server version can't do, in plain words. The general ones (no syncing, no password-reset emails, no automatic lock, backups only when you open it) are covered in the [main README](../README.md).
+Server-only notes — the basics (no reset email, no auto-lock, backups are on you) are in the [main README](../README.md).
 
-- **It only works while the program is running.** If LocalVault isn't running, the page won't open. Run `node setup.js` once to have it start automatically when you log in.
-- **There's no password on the server itself.** Anyone using this computer can reach it. Your passwords stay encrypted, so they can't be read — but another program could overwrite your saved file. That's why it stays on your own machine and must never be opened to your network.
-- **Don't use two browsers at the same time.** Any browser can open this address and will pick up the latest saved copy when it starts — so moving between Chrome and Firefox needs no exporting. But if two are open at once, whichever saves last overwrites the other's changes. Use one at a time, and reopen the tab to get the newest version.
-- **It won't warn you if it loses connection.** If the program stops while you're working, your changes wait in the browser and get saved later — no error message appears.
-- **Weekly snapshots stay in your browser.** Your vault is saved to a file on your disk, but the weekly snapshots are not. Clear your browser data and the vault comes back; the snapshots don't.
-- **Moving to or from the double-click file is manual.** The file version and this server version store data in different places, so you have to export from one and import into the other — see **First run** above.
-- **Back up `vault.store.json` yourself.** It's the copy on your disk, and Git deliberately ignores it so it never gets shared with anyone.
+- **Works only while running.** No program, no page. Run `node setup.js` once to auto-start on login.
+- **No login on it.** Keep it on this PC only, never open it to the network.
+- **One browser at a time.** All browsers share one vault, but the last save wins and open tabs don't refresh.
+- **Snapshots stay in the browser.** The vault is saved to disk, the weekly snapshots are not.
 
 ---
 
