@@ -68,30 +68,14 @@ Everything stored is **ciphertext** (AES-256-GCM, keys from PBKDF2-SHA-256). The
 
 ## ⚠️ Honest limitations
 
-No software is perfect. Here's what LocalVault can't do, in plain words.
+- **No password reset.** There is no reset email — your recovery key is the only way back in. Anyone holding it can open your vault.
+- **No auto-lock.** It stays open until you click **Lock** or close the tab.
+- **Backups are on you.** A snapshot is saved once a week, but only when you open the app (keeps the last 4). Copy the encrypted backup to a USB stick now and then.
+- **Exports show passwords.** CSV, Excel and plain JSON are readable by anyone. Only the encrypted backup is safe to keep around.
 
-**Good to know, whichever version you use**
+**📄 Double-click file:** one browser = one vault. Clearing that browser's data deletes everything. Move via export/import.
 
-- **It won't sync for you.** A change you make in one browser won't appear in another on its own. You have to move it yourself (see the notes below for each version).
-- **There's no "forgot password" email.** There's no company behind this to send you a reset link. Your recovery key is the only reset — so keep it somewhere safe and private. Anyone who finds it can open your vault.
-- **Backups are your job.** Every so often, download the backup file and put it somewhere safe, like a USB stick.
-- **Backups only happen while you're using it.** The app quietly saves a snapshot once a week, but only when you open it and it's been a week. If you never open it, no snapshot is made. It also keeps only the last 4.
-- **It won't lock itself.** Your vault stays open until you click **Lock** or close the tab. On a shared computer, remember to lock it.
-- **Most exports are readable by anyone.** CSV, Excel and plain JSON exports show your passwords in clear text. Only the *encrypted* backup file is safe to leave lying around.
-
-**📄 If you just double-click the file (`LocalVault.html`)**
-
-- **Only that one browser has your vault.** Chrome, Edge and Firefox each keep their own separate copy. To move your vault between them, you export it from one and import it into the other.
-- **Clearing your browser data will delete it.** If you clear cookies or site data, your vault and its snapshots are gone — there's no other copy anywhere.
-- **There's only a little room.** Browsers only allow a few megabytes of storage. Fine for passwords, but don't expect to store documents.
-
-**🖥️ If you run the self-hosted version (`selfhosted/`)**
-
-- **It only works while the program is running.** If LocalVault isn't running, the page won't open at all. Run `node setup.js` once to start it automatically when you log in.
-- **Anyone using this computer can reach it.** There's no password on the server itself. Your passwords stay encrypted, so they can't be read — but a program on your machine could overwrite your saved file. That's why it runs only on your own computer and must never be opened up to your network.
-- **Don't use two browsers at the same time.** Chrome, Edge and Firefox can all open the same vault — they pick up the latest saved copy when they start. But if two of them are open at once, whichever saves last overwrites the other's changes. Use one at a time, and reopen the tab to get the newest version.
-- **It won't warn you if it loses connection.** If the program stops while you're working, your changes quietly stay in the browser and are saved later. You won't see an error.
-- **Weekly snapshots stay in the browser.** The vault itself is copied to a file on your disk, but the weekly snapshots are not. Clear your browser data and the vault comes back — the snapshots don't.
+**🖥️ Self-hosted:** works only while the program runs. No login on it, so keep it on this PC only. All browsers share one vault, but use one at a time — last save wins, open tabs don't refresh. Weekly snapshots stay in the browser, not on disk.
 
 ---
 
