@@ -4,6 +4,7 @@
  */
 #include "wifi_manager.h"
 #include "config.h"
+#include "vault_store.h"
 
 #if defined(ESP8266)
   #include <ESP8266WiFi.h>
@@ -57,6 +58,15 @@ void wifiInit() {
     Serial.printf("[WiFi] Connected! IP: %s\n", WiFi.localIP().toString().c_str());
     currentMode = LV_WIFI_MODE_STA;
     wifiStopAP();
+
+    // Only reset vault if it exists but is corrupted (cannot be parsed)
+    if (vaultStoreExists()) {
+      JsonDocument probe;
+      if (!vaultStoreGet(probe)) {
+        Serial.println("[VaultStore] Corrupted vault detected, resetting");
+        vaultStoreReset();
+      }
+    }
   } else {
     Serial.println("[WiFi] STA failed, starting AP mode");
     wifiStartAP();

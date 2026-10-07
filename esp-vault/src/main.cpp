@@ -10,6 +10,7 @@
 #include "config.h"
 #include "wifi_manager.h"
 #include "vault_store.h"
+#include "auth_store.h"
 #include "http_server.h"
 
 void setup() {
@@ -70,6 +71,7 @@ void setup() {
   
   // Initialize subsystems
   vaultStoreInit();
+  authInit();
   httpServerInit();
   wifiInit();  // This also loads config and applies defaults
   

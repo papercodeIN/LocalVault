@@ -86,5 +86,8 @@ void configApplyDefaults() {
   if (!configDoc[CFG_KEY_STATIC_NETMASK].is<const char*>()) {
     configDoc[CFG_KEY_STATIC_NETMASK] = DEFAULT_NETMASK; changed = true;
   }
+  if (!configDoc[CFG_KEY_VAULT_MODE].is<const char*>()) {
+    configDoc[CFG_KEY_VAULT_MODE] = "device"; changed = true;
+  }
   if (changed) configSave();
 }

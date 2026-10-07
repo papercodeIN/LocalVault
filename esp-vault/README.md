@@ -13,6 +13,7 @@ No server, no cloud — the device *is* the vault. Plug it in, connect to WiFi, 
 | 📌 **Static IP support** | Set a fixed IP via web UI |
 | 🔄 **Auto-reconnect** | Falls back to AP if WiFi drops, reconnects when back |
 | 💾 **Encrypted vault on flash** | Mirrors `/api/store` API — same format as Node server |
+| 🔑 **PIN-protected device vault** | Optional mode: 4–8 digit PIN once per browser (session cookie), plaintext vault on flash, rate-limited (5 tries → 60 s lockout) |
 | 🌈 **WebCrypto polyfill** | Works over plain HTTP (no HTTPS needed on LAN) |
 | 🖥️ **Three build methods** | PlatformIO, Arduino IDE, or **one-click browser flash** |
 
@@ -31,6 +32,10 @@ No server, no cloud — the device *is* the vault. Plug it in, connect to WiFi, 
 6. Scan for your home WiFi, enter password, (optionally set static IP) → **Save**
 7. Device restarts, joins your network → find its IP (router / AP page)
 8. Open **http://<device-ip>** in any browser → **LocalVault loads!**
+
+> **Vault mode** is chosen on the WiFi setup page (radio: *Device vault* vs *Zero-knowledge*).
+> - **Device vault** (default) — no master password. Each new browser enters a **4–8 digit PIN** once, then a cookie keeps it unlocked. Vault is stored **plaintext** on the device (`/vault.plain.json`) and served in plain text to logged-in browsers.
+> - **Zero-knowledge** — the classic LocalVault flow: encrypted blob in browser `localStorage`, master password per browser.
 
 ---
 
@@ -107,9 +112,10 @@ esp-vault/
 │   ├── main.cpp            # Entry point
 │   ├── config.h/.cpp       # LittleFS config (/config.json)
 │   ├── wifi_manager.h/.cpp # STA + AP fallback, static IP
-│   ├── vault_store.h/.cpp  # /api/store mirror (atomic writes)
+│   ├── vault_store.h/.cpp  # /vault.enc.json mirror (atomic writes)
+│   ├── auth_store.h/.cpp   # device vault: PIN (config), session tokens, /vault.plain.json
 │   ├── http_server.h/.cpp  # WebServer + API endpoints
-│   └── localvault_html.h   # Auto-generated: gzipped HTML + polyfill
+│   └── localvault_html.h   # Auto-generated: gzipped HTML + polyfill + device shim
 ├── arduino-ide/
 │   └── LocalVault_ESP/     # Single .ino for Arduino IDE
 ├── web-flash/              # Browser flasher (ESP Web Tools)
@@ -127,20 +133,27 @@ esp-vault/
 
 ---
 
-## 🔌 HTTP API (same as Node `server.js`)
+## 🔌 HTTP API (mirrors Node `server.js` where applicable)
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/` | GET | LocalVault.html (gzipped, with WebCrypto polyfill) |
+| `/` | GET | LocalVault.html (gzipped, with WebCrypto polyfill + device shim) |
 | `/health` | GET | `{ok, version, device, mode, ip, uptime, freeHeap, vaultExists}` |
-| `/api/store` | GET | Returns `{blob, meta, rec, savedAt}` |
+| `/api/store` | GET | Returns `{blob, meta, rec, savedAt}` (zero-knowledge mode) |
 | `/api/store` | PUT | Accepts `{blob, meta, rec}` → validates → atomic write |
-| `/api/config` | GET | Current WiFi/static IP/AP settings |
-| `/api/config` | POST | Update config (device name, static IP, AP creds) |
+| `/api/config` | GET | WiFi/static IP/AP settings + `{vaultMode, pinSet}` |
+| `/api/config` | POST | Update config (device name, static IP, AP creds, `vaultMode`) |
 | `/api/wifi/scan` | POST | Scan networks → `[{ssid, rssi, encryption}]` |
 | `/api/wifi/connect` | POST | Save credentials & connect |
 | `/api/wifi/forget` | POST | Erase WiFi, enter AP mode |
 | `/api/restart` | POST | Restart device |
+| `/api/auth` | GET | Device mode: `{pinSet, authed}` |
+| `/api/auth` | POST | Device mode: login with PIN → `Set-Cookie: lv_sess=<token>` |
+| `/api/auth/logout` | POST | Revoke current session token (clears cookie) |
+| `/api/pin/setup` | POST | Device mode: create/change PIN (`{pin}`) |
+| `/api/vault` | GET | Device mode: `{vault, meta}` plaintext (requires session) |
+| `/api/vault` | PUT | Device mode: save `{vault, meta}` plaintext |
+| `/api/vault` | DELETE | Device mode: erase vault |
 
 ---
 
@@ -151,8 +164,8 @@ esp-vault/
 3. **User enters home WiFi** → device saves to `/config.json` → restarts
 4. **STA mode** — connects to home WiFi, serves vault on that IP
 5. **If WiFi lost** → auto-reconnect every 30s; after timeout → falls back to AP
-6. **Vault data** — stored encrypted in LittleFS `/vault.store.json` (mirrors browser `localStorage`)
-7. **Browser** — loads HTML from device, uses `/api/store` to sync vault (same as Node server)
+6. **Zero-knowledge vault** — encrypted blob in LittleFS `/vault.enc.json`, mirrors browser `localStorage`. Keys never leave the browser.
+7. **Device vault** — PIN lives in config, session tokens in `/tokens.json` (max 12, oldest evicted), vault plaintext in `/vault.plain.json`. A slim JS shim injected into the served page bypasses the master-password screens and syncs straight to `/api/vault`.
 
 ---
 

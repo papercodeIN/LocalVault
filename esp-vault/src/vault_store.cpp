@@ -81,3 +81,11 @@ void vaultStoreErase() {
   if (LittleFS.exists(String(VAULT_FILE) + ".tmp")) LittleFS.remove(String(VAULT_FILE) + ".tmp");
   Serial.println("[VaultStore] Erased");
 }
+
+/* -------------------------------------------------------------
+   NEW: convenience wrapper – call from Wi‑Fi manager after STA mode
+   ------------------------------------------------------------- */
+void vaultStoreReset() {
+  vaultStoreErase();          // delete any possibly corrupted vault
+  Serial.println("[VaultStore] Vault reset (erased)");
+}

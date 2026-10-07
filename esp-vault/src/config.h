@@ -11,10 +11,19 @@
 // Filesystem paths
 #define CONFIG_FILE "/config.json"
 #define VAULT_FILE  "/vault.store.json"
+#define VAULT_PLAIN_FILE "/vault.plain.json"
+#define TOKENS_FILE "/tokens.json"
 
 // HTTP server
 #define HTTP_PORT 80
 #define MAX_API_BODY 25 * 1024 * 1024  // 25 MB, matches server.js
+
+// Device-vault mode body cap (RAM-bound: ESP8266 has 80 KB total heap)
+#if defined(ESP8266)
+  #define MAX_DEVICE_VAULT_BODY (24 * 1024)
+#else
+  #define MAX_DEVICE_VAULT_BODY (96 * 1024)
+#endif
 
 // WiFi
 #define WIFI_CONNECT_TIMEOUT_MS 15000
@@ -54,6 +63,8 @@
 #define CFG_KEY_DEVICE_NAME     "device_name"
 #define CFG_KEY_AP_SSID         "ap_ssid"
 #define CFG_KEY_AP_PASS         "ap_pass"
+#define CFG_KEY_VAULT_MODE      "vault_mode"   // "device" (PIN, plaintext on ESP) | "zk" (ciphertext only)
+#define CFG_KEY_PIN             "pin"          // device PIN, 4-8 digits
 
 // Function declarations
 bool configLoad();

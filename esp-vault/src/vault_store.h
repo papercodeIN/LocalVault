@@ -14,5 +14,6 @@ bool vaultStoreGet(JsonDocument& out);
 bool vaultStorePut(const JsonDocument& in);
 bool vaultStoreExists();
 void vaultStoreErase();
+void vaultStoreReset();   // <-- added
 
 #endif // VAULT_STORE_H
