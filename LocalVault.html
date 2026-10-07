@@ -189,6 +189,17 @@ section.list{flex:1;background:#fff;display:flex;flex-direction:column;min-heigh
 .owner-pill{font-size:12px;color:#175ddc;background:#e8effc;border-radius:6px;padding:3px 10px;text-align:center;white-space:nowrap;overflow:hidden}
 .entry .eacts{display:flex;gap:2px;justify-content:flex-end}
 .rowmenu{position:absolute;right:14px;top:46px;background:#fff;border:1px solid #dfe5ee;border-radius:10px;box-shadow:0 12px 32px rgba(23,35,59,.18);z-index:30;min-width:190px;padding:5px;cursor:default}
+/* Bitwarden-style + Add dropdown */
+#addMenu{position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1px solid #dfe5ee;border-radius:12px;box-shadow:0 12px 32px rgba(23,35,59,.18);z-index:50;min-width:190px;padding:6px}
+#addMenu button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:14px;color:#17233b;text-align:left;margin:0}
+#addMenu button:hover{background:#eef2f9}
+#addMenu button .nic{color:#5c6b82}
+#addMenu .add-sep{border:0;border-top:1px solid #e5eaf1;margin:5px 4px}
+body.dark #addMenu{background:#1b2947;border-color:#334155}
+body.dark #addMenu button{color:#f1f5f9}
+body.dark #addMenu button:hover{background:#24304d}
+body.dark #addMenu button .nic{color:#94a3b8}
+body.dark #addMenu .add-sep{border-color:#334155}
 .rowmenu button{display:flex;width:100%;gap:9px;align-items:center;background:none;border:0;padding:9px 11px;font-size:13.5px;color:#17233b;border-radius:7px;cursor:pointer;text-align:left}
 .rowmenu button:hover{background:#eef2f8}
 .rowmenu button.danger{color:#c81e1e}
@@ -255,9 +266,28 @@ section.detail{position:fixed;top:0;right:0;bottom:0;width:430px;max-width:94vw;
 #setModal .modal{max-width:920px;max-height:90vh}
 .set-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;align-items:start}
 @media(max-width:720px){.set-grid{grid-template-columns:1fr}}
-#entryModal .modal{max-width:860px}
-.em-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;align-items:start}
-@media(max-width:720px){.em-grid{grid-template-columns:1fr}}
+#entryModal .modal{max-width:560px}
+/* Bitwarden-style sectioned entry form */
+.em-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+.em-head h3{margin:0;font-size:20px}
+.em-sect{display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:600;margin:18px 0 8px;color:#17233b}
+.em-card{border:1px solid #e3e8f0;border-radius:12px;padding:12px 14px 14px;background:#fff}
+.em-card>label:first-child{margin-top:0}
+.modal .req{color:#c81e1e}
+#eFavStar.on svg{fill:#f5b301;stroke:#b45309}
+.linkbtn{background:none;border:0;color:#175ddc;cursor:pointer;font-size:14px;font-weight:600;padding:8px 0 0;text-align:left}
+.linkbtn:hover{text-decoration:underline}
+.uri-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.uri-row input{flex:1;min-width:0}
+.uri-row .iconbtn{flex-shrink:0}
+.qmark{display:inline-block;width:16px;height:16px;border:1.5px solid #175ddc;color:#175ddc;border-radius:50%;font-size:11px;line-height:14px;text-align:center;cursor:help;vertical-align:1px}
+.reprompt-row{display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:14px;margin:14px 0 0}
+#entryModal .actions{position:sticky;bottom:0;background:inherit;padding:14px 0 2px}
+body.dark .em-sect{color:#f1f5f9}
+body.dark .em-card{background:#1b2947;border-color:#334155}
+body.dark .linkbtn{color:#60a5fa}
+body.dark .qmark{border-color:#60a5fa;color:#60a5fa}
+body.dark #eFavStar.on svg{fill:#f5b301;stroke:#f5b301}
 .set-sec{border-top:1px solid #eef1f6;margin-top:6px;padding-top:2px}
 .set-sec>h4{margin:12px 0 2px;font-size:13px;color:#17233b}
 .hl-score{display:flex;align-items:center;gap:14px;background:#f4f6fa;border:1px solid #dfe5ee;border-radius:12px;padding:14px 16px;margin:12px 0 4px}
@@ -453,7 +483,7 @@ body.dark .switch .sw{background:#475569}
       </div>
     </aside>
     <section class="list">
-      <div class="vault-top"><button class="eicon" id="menuBtn" data-icon="menu" title="Menu"></button><h1>Vault</h1><span style="flex:1"></span><button class="eicon" id="themeBtn" data-icon="moon" title="Dark mode"></button><button class="bw-add" id="addBtn">+ Add</button><span class="bw-avatar" data-icon="lock"></span><button class="eicon" id="logoutBtn" data-icon="power" title="Log out"></button></div>
+      <div class="vault-top"><button class="eicon" id="menuBtn" data-icon="menu" title="Menu"></button><h1>Vault</h1><span style="flex:1"></span><button class="eicon" id="themeBtn" data-icon="moon" title="Dark mode"></button><span style="position:relative"><button class="bw-add" id="addBtn">+ Add</button><div id="addMenu" class="hidden"><button data-add="login"><span class="nic" data-icon="globe"></span>Login</button><button data-add="card"><span class="nic" data-icon="card"></span>Card</button><button data-add="identity"><span class="nic" data-icon="idcard"></span>Identity</button><button data-add="note"><span class="nic" data-icon="note"></span>Note</button><button data-add="sshkey"><span class="nic" data-icon="key"></span>SSH key</button><hr class="add-sep" /><button data-add="folder"><span class="nic" data-icon="folder"></span>Folder</button></div></span><span class="bw-avatar" data-icon="lock"></span><button class="eicon" id="logoutBtn" data-icon="power" title="Log out"></button></div>
       <div class="backup-banner hidden" id="backupBanner"><span class="grow">Weekly backup due — download your encrypted backup to restore in any browser.</span><button class="bw-mini" id="bannerDl">Download</button><button class="bw-mini ghost" id="bannerLater">Later</button></div>
       <div class="search"><span>🔍</span><input id="search" type="text" placeholder="Search vault" /><button id="searchClear" class="hidden" title="Clear">⊗</button></div>
       <div class="bulkbar hidden" id="bulkBar"><span id="bulkCount"></span><span style="flex:1"></span><button class="txtbtn" id="bulkBin">Move to Bin</button><button class="txtbtn dim" id="bulkClear">Clear</button></div>
@@ -465,35 +495,69 @@ body.dark .switch .sw{background:#475569}
 
 <!-- ENTRY MODAL -->
 <div id="entryModal" class="overlay hidden"><div class="modal">
-  <h3 id="entryTitle">New login</h3>
+  <div class="em-head"><h3 id="entryTitle">Add login</h3><button class="eicon" id="eX" data-icon="x" title="Close"></button></div>
   <input type="hidden" id="eId" />
-  <div class="em-grid"><div class="em-col">
-  <div class="seg" id="typeSeg"><button data-type="login" class="on">Login</button><button data-type="card">Card</button><button data-type="identity">Identity</button><button data-type="note">Note</button></div>
-  <label>Name</label><input id="eName" type="text" placeholder="e.g. Gmail" />
+  <div class="seg" id="typeSeg"><button data-type="login" class="on">Login</button><button data-type="card">Card</button><button data-type="identity">Identity</button><button data-type="note">Note</button><button data-type="sshkey">SSH key</button></div>
+  <div class="em-sect"><span>Item details</span><button class="eicon" id="eFavStar" data-icon="star" title="Favorite"></button></div>
+  <div class="em-card">
+  <label>Item name <span class="req">*</span></label><input id="eName" type="text" placeholder="e.g. Gmail" />
+  <label>Folder</label><select id="eFolder"></select>
+  <input type="checkbox" id="eFav" class="hidden" />
+  </div>
   <div id="fLogin">
-  <div class="row2"><div><label>Username / email</label><input id="eUser" type="text" /></div><div><label>URL</label><input id="eUrl" type="text" placeholder="https://…" /></div></div>
+  <div class="em-sect"><span>Login credentials</span></div>
+  <div class="em-card">
+  <label>Username</label>
+  <div class="valbox"><input id="eUser" type="text" /><button class="iconbtn" id="eUserGen" data-icon="dice" title="Generate username"></button></div>
   <label>Password</label>
   <div class="valbox"><input id="ePass" type="password" /><button class="iconbtn" id="eShow" data-icon="eye" title="Show/hide"></button><button class="iconbtn" id="eGen" data-icon="dice" title="Generate"></button><button class="iconbtn" id="eCopy" data-icon="copy" title="Copy"></button></div>
   <div class="strength"><i id="ePassBar"></i></div>
-    <div><label>TOTP secret (optional)</label><input id="eTotp" type="text" placeholder="JBSW Y3DP" /></div>
-    <p class="hint">TOTP codes sit beside passwords — for critical accounts, prefer a separate authenticator app.</p>
+  <p class="hint" id="eGenHint" style="cursor:pointer">Use the generator to create a strong unique password</p>
+  <label>Authenticator key <span class="qmark" title="Paste the setup key from the site (usually shown as an alternative to the QR code). Codes appear in the detail view.">?</span></label>
+  <div class="valbox"><input id="eTotp" type="text" placeholder="JBSW Y3DP" /><button class="iconbtn" id="eTotpShow" data-icon="eye" title="Show/hide"></button></div>
+  <p class="hint">TOTP codes sit beside passwords — for critical accounts, prefer a separate authenticator app.</p>
+  </div>
+  <div class="em-sect"><span>Autofill options</span></div>
+  <div class="em-card">
+  <label>Website (URI)</label>
+  <div id="uriRows"></div>
+  <button class="linkbtn" id="uriAdd" type="button">+ Add website</button>
+  </div>
   </div>
   <div id="fCard" class="hidden">
+  <div class="em-sect"><span>Card details</span></div>
+  <div class="em-card">
     <label>Cardholder name</label><input id="cHolder" type="text" placeholder="As printed on card" />
     <label>Card number</label>
     <div class="valbox"><input id="cNumber" type="password" inputmode="numeric" placeholder="4111 1111 1111 1111" /><button class="iconbtn" id="cShow" data-icon="eye" title="Show/hide"></button><button class="iconbtn" id="cCopy" data-icon="copy" title="Copy"></button></div>
     <div class="row2"><div><label>Expiry (MM/YY)</label><input id="cExp" type="text" placeholder="08/28" /></div><div><label>CVV</label><input id="cCvv" type="password" inputmode="numeric" placeholder="123" /></div></div>
   </div>
+  </div>
   <div id="fIdn" class="hidden">
+  <div class="em-sect"><span>Identity details</span></div>
+  <div class="em-card">
     <div class="row2"><div><label>First name</label><input id="iFirst" type="text" /></div><div><label>Last name</label><input id="iLast" type="text" /></div></div>
     <div class="row2"><div><label>Email</label><input id="iEmail" type="text" /></div><div><label>Phone</label><input id="iPhone" type="text" /></div></div>
     <label>Address</label><textarea id="iAddr" style="min-height:52px"></textarea>
   </div>
-  </div><div class="em-col">
-  <div class="row2"><div><label>Folder</label><select id="eFolder"></select></div><div style="display:flex;align-items:flex-end;padding-bottom:2px"><label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:14px;margin:0"><input type="checkbox" id="eFav" style="width:auto" /> Favorite</label></div></div>
-  <div class="set-sec"><h4>Custom fields</h4><div id="customEd"></div><button class="btn btn-ghost" id="cfAdd" type="button" style="margin-top:8px">+ Add field</button></div>
-  <label id="eNotesLbl">Notes</label><textarea id="eNotes"></textarea>
-  </div></div>
+  </div>
+  <div id="fSsh" class="hidden">
+  <div class="em-sect"><span>SSH key</span></div>
+  <div class="em-card">
+    <label>Private key</label><textarea id="sPriv" placeholder="-----BEGIN OPENSSH PRIVATE KEY-----" style="min-height:96px;font-family:ui-monospace,monospace;font-size:12.5px"></textarea>
+    <div style="display:flex;gap:8px;margin-top:6px"><button class="btn btn-ghost" id="sPrivCopy" type="button">Copy private key</button></div>
+    <label>Public key</label><textarea id="sPub" placeholder="ssh-ed25519 AAAA…" style="min-height:56px;font-family:ui-monospace,monospace;font-size:12.5px"></textarea>
+    <div style="display:flex;gap:8px;margin-top:6px"><button class="btn btn-ghost" id="sPubCopy" type="button">Copy public key</button></div>
+    <label>Passphrase (optional)</label>
+    <div class="valbox"><input id="sPass" type="password" /><button class="iconbtn" id="sPassShow" data-icon="eye" title="Show/hide"></button><button class="iconbtn" id="sPassCopy" data-icon="copy" title="Copy"></button></div>
+  </div>
+  </div>
+  <div class="em-sect"><span id="addlLbl">Additional options</span></div>
+  <div class="em-card">
+  <div id="eNotesWrap"><label id="eNotesLbl">Notes</label><textarea id="eNotes"></textarea></div>
+  <label class="reprompt-row"><input type="checkbox" id="eReprompt" style="width:auto" /> Master password re-prompt</label>
+  <div class="set-sec"><h4>Custom fields</h4><div id="customEd"></div><button class="linkbtn" id="cfAdd" type="button">+ Add field</button></div>
+  </div>
   <div class="actions"><button class="btn btn-primary" id="eSave">Save</button><button class="btn btn-ghost" id="eCancel">Cancel</button></div>
 </div></div>
 
@@ -655,7 +719,12 @@ menu:`<svg viewBox="0 0 24 24" ${SW}><line x1="3" y1="6" x2="21" y2="6"/><line x
 moon:`<svg viewBox="0 0 24 24" ${SW}><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>`,
 sun:`<svg viewBox="0 0 24 24" ${SW}><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>`,
 download:`<svg viewBox="0 0 24 24" ${SW}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
-upload:`<svg viewBox="0 0 24 24" ${SW}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`};
+upload:`<svg viewBox="0 0 24 24" ${SW}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`,
+globe:`<svg viewBox="0 0 24 24" ${SW}><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+card:`<svg viewBox="0 0 24 24" ${SW}><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>`,
+idcard:`<svg viewBox="0 0 24 24" ${SW}><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="8.5" cy="11" r="2"/><path d="M5.5 17c.6-1.8 1.7-2.7 3-2.7s2.4.9 3 2.7"/><line x1="14" y1="9" x2="18" y2="9"/><line x1="14" y1="13" x2="18" y2="13"/></svg>`,
+note:`<svg viewBox="0 0 24 24" ${SW}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>`,
+key:`<svg viewBox="0 0 24 24" ${SW}><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>`};
 const icon=n=>ICONS[n]||'';
 function fillIconsIn(container){(container||document).querySelectorAll('[data-icon]').forEach(b=>{if(!b.innerHTML)b.innerHTML=icon(b.dataset.icon);});}
 
@@ -940,7 +1009,7 @@ $('bulkBin').onclick=()=>{
   if(selectedId&&selSet.has(selectedId))selectedId=null;
   selSet.clear();persist().then(renderAll);
 };
-document.addEventListener('click',()=>{document.querySelectorAll('.rowmenu').forEach(m=>m.classList.add('hidden'));});
+document.addEventListener('click',()=>{document.querySelectorAll('.rowmenu').forEach(m=>m.classList.add('hidden'));if($('addMenu'))$('addMenu').classList.add('hidden');});
 $('addFolderBtn').onclick=()=>{
   const name=prompt('Folder name:');if(!name||!name.trim())return;
   VAULT.folders.push({id:uid(),name:name.trim()});persist().then(renderAll);
@@ -957,12 +1026,13 @@ function visibleEntries(){
   return arr.sort((a,b)=>sortMode==='name-desc'?-by(a,b):by(a,b));
 }
 /* ---- item 4 helpers: per-type subtitle, secret, search text ---- */
-const ETYPES={login:'Login',card:'Card',identity:'Identity',note:'Note'};
+const ETYPES={login:'Login',card:'Card',identity:'Identity',note:'Note',sshkey:'SSH key'};
 function entrySub(e){
   const t=e.type||'login';
   if(t==='card'){const d=((e.card||{}).number||'').replace(/\D/g,'');return d?'Card •••• '+d.slice(-4):'Card';}
   if(t==='identity'){const n=e.idn||{};return n.email||n.phone||[n.first,n.last].filter(Boolean).join(' ')||'Identity';}
   if(t==='note'){return (e.notes||'').split('\n')[0].slice(0,60)||'Note';}
+  if(t==='sshkey'){const p=((e.ssh||{}).pub||'').split(' ')[0];return p||'SSH key';}
   return e.username||'—';
 }
 function entrySecret(e){
@@ -970,11 +1040,12 @@ function entrySecret(e){
   if(t==='card')return (e.card||{}).number||'';
   if(t==='identity'){const n=e.idn||{};return n.email||n.phone||'';}
   if(t==='note')return e.notes||'';
+  if(t==='sshkey')return (e.ssh||{}).priv||'';
   return e.password||'';
 }
 function entryText(e){
-  const c=e.custom||[],k=e.card||{},n=e.idn||{};
-  return [e.type,e.name,e.username,e.password,e.url,e.totp,e.notes,k.holder,k.number,k.exp,n.first,n.last,n.email,n.phone,n.address,...c.map(f=>f.n+' '+f.v)].join(' ').toLowerCase();
+  const c=e.custom||[],k=e.card||{},n=e.idn||{},s=e.ssh||{};
+  return [e.type,e.name,e.username,e.password,e.url,(e.urls||[]).join(' '),e.totp,e.notes,k.holder,k.number,k.exp,n.first,n.last,n.email,n.phone,n.address,s.priv,s.pub,s.pass,...c.map(f=>f.n+' '+f.v)].join(' ').toLowerCase();
 }
 function renderAll(){renderCounts();renderFolders();renderList();renderDetail();refreshBackupBanner();document.querySelectorAll('#appView button[title]:not([aria-label]),.modal button[title]:not([aria-label])').forEach(b=>b.setAttribute('aria-label',b.title));}
 function renderCounts(){
@@ -1009,7 +1080,7 @@ function renderList(){
   for(const e of arr){
     const d=document.createElement('div');d.className='entry'+(e.id===selectedId?' active':'');
     const t=e.type||'login';
-    const copyLbl=t==='card'?'Copy number':t==='identity'?'Copy email':t==='note'?'Copy note':'Copy password';
+    const copyLbl=t==='card'?'Copy number':t==='identity'?'Copy email':t==='note'?'Copy note':t==='sshkey'?'Copy private key':'Copy password';
     const menu=e.trashed
       ?`<button data-m="restore"><span class="nic">${icon('restore')}</span>Restore</button><button data-m="purge" class="danger"><span class="nic">${icon('trash')}</span>Delete forever</button>`
       :`<button data-m="view"><span class="nic">${icon('eye')}</span>View details</button><button data-m="secret"><span class="nic">${icon('copy')}</span>${copyLbl}</button>${t==='login'?`<button data-m="user"><span class="nic">${icon('copy')}</span>Copy username</button>`:''}<button data-m="bin" class="danger"><span class="nic">${icon('trash')}</span>Move to Bin</button>`;
@@ -1044,11 +1115,22 @@ function updateBulk(){
   $('bulkBin').textContent=filter==='trash'?'Delete forever':'Move to Bin';
 }
 function folderName(id){return VAULT.folders.find(f=>f.id===id)?.name||'No folder';}
+/* website URI rows for the detail view (avoids nested template literals) */
+function uriRowsHtml(e){
+  const urls=(e.urls&&e.urls.length?e.urls:[e.url]).filter(Boolean);
+  if(!urls.length)return '<div class="bw-row"><div class="grow"><div class="bw-lab">Website</div><div class="bw-val dim">—</div></div></div>';
+  return urls.map((u,i)=>{
+    const lbl='Website'+(urls.length>1?' '+(i+1):'');
+    return '<div class="bw-row"><div class="grow"><div class="bw-lab">'+lbl+'</div><div class="bw-val">'+esc(u)+'</div></div>'
+      +'<button class="eicon" data-open="'+esc(u)+'" title="Open website">'+icon('open')+'</button>'
+      +'<button class="eicon" data-c="'+esc(u)+'" title="Copy URL">'+icon('copy')+'</button></div>';
+  }).join('');
+}
 function renderDetail(){
   const box=$('detail'),e=VAULT.entries.find(x=>x.id===selectedId);
   if(!e){box.classList.add('hidden');box.innerHTML='';return;}
   box.classList.remove('hidden');
-  const t=e.type||'login', card=e.card||{}, idn=e.idn||{};
+  const t=e.type||'login', card=e.card||{}, idn=e.idn||{}, ssh=e.ssh||{};
   const digits=(card.number||'').replace(/\D/g,'');
   const cardMasked=digits.length>4?'•••• •••• •••• '+digits.slice(-4):'••••••••';
   const totpHtml=(t==='login'&&e.totp)?`<div class="bw-row"><div class="grow"><div class="bw-lab">Verification code · <span id="totpCount"></span>s</div><div class="bw-val totp-code" id="totpCode">···</div><div class="totp-bar"><i id="totpBar"></i></div></div><button class="eicon" onclick="copyTotp()" title="Copy code" aria-label="Copy code">${icon('copy')}</button></div>`:'';
@@ -1063,9 +1145,7 @@ function renderDetail(){
     ${totpHtml}
   </div>
   <div class="bw-sect">Autofill options</div>
-  <div class="bw-card">
-    <div class="bw-row"><div class="grow"><div class="bw-lab">Website</div><div class="bw-val ${e.url?'':'dim'}">${esc(e.url||'—')}</div></div>${e.url?`<button class="eicon" id="dOpen" title="Open website">${icon('open')}</button>`:''}<button class="eicon" data-c="${esc(e.url||'')}" title="Copy URL">${icon('copy')}</button></div>
-  </div>`:''}
+  <div class="bw-card">${uriRowsHtml(e)}</div>`:''}
   ${t==='card'?`<div class="bw-sect">Card details</div>
   <div class="bw-card">
     <div class="bw-row"><div class="grow"><div class="bw-lab">Cardholder</div><div class="bw-val ${card.holder?'':'dim'}">${esc(card.holder||'—')}</div></div><button class="eicon" data-c="${esc(card.holder||'')}" title="Copy">${icon('copy')}</button></div>
@@ -1078,6 +1158,12 @@ function renderDetail(){
     ${[['First name',idn.first],['Last name',idn.last],['Email',idn.email],['Phone',idn.phone]].map(([l,v])=>`<div class="bw-row"><div class="grow"><div class="bw-lab">${l}</div><div class="bw-val ${v?'':'dim'}">${esc(v||'—')}</div></div><button class="eicon" data-c="${esc(v||'')}" title="Copy">${icon('copy')}</button></div>`).join('')}
     <div class="bw-row"><div class="grow"><div class="bw-lab">Address</div><div class="bw-val ${idn.address?'':'dim'}" style="white-space:pre-wrap">${esc(idn.address||'—')}</div></div><button class="eicon" data-c="${esc(idn.address||'')}" title="Copy">${icon('copy')}</button></div>
   </div>`:''}
+  ${t==='sshkey'?`<div class="bw-sect">SSH key</div>
+  <div class="bw-card">
+    <div class="bw-row"><div class="grow"><div class="bw-lab">Private key</div><div class="bw-val" id="sshPrivMask" style="white-space:pre-wrap;word-break:break-all">••••••••</div></div><button class="eicon" id="dShowSshPriv" title="Show/hide">${icon('eye')}</button><button class="eicon" data-sshcopy="priv" title="Copy private key">${icon('copy')}</button></div>
+    <div class="bw-row"><div class="grow"><div class="bw-lab">Public key</div><div class="bw-val ${ssh.pub?'':'dim'}" style="white-space:pre-wrap;word-break:break-all">${esc(ssh.pub||'—')}</div></div><button class="eicon" data-sshcopy="pub" title="Copy public key">${icon('copy')}</button></div>
+    <div class="bw-row"><div class="grow"><div class="bw-lab">Passphrase</div><div class="bw-val" id="sshPassMask">••••••••</div></div><button class="eicon" id="dShowSshPass" title="Show/hide">${icon('eye')}</button><button class="eicon" data-sshcopy="pass" title="Copy passphrase">${icon('copy')}</button></div>
+  </div>`:''}
   ${e.custom?.length?`<div class="bw-sect">Custom fields (${e.custom.length})</div><div class="bw-card">${e.custom.map((f,i)=>`<div class="bw-row"><div class="grow"><div class="bw-lab">${esc(f.n||'Field '+(i+1))}</div><div class="bw-val" id="cf-${i}">${f.h?'••••••••':esc(f.v||'—')}</div></div>${f.h?`<button class="eicon" data-cfshow="${i}" title="Show/hide">${icon('eye')}</button>`:''}<button class="eicon" data-cfcopy="${i}" title="Copy">${icon('copy')}</button></div>`).join('')}</div>`:''}
   ${e.notes?`<div class="bw-sect">${t==='note'?'Note':'Notes'}</div><div class="bw-card"><div class="bw-notes">${esc(e.notes)}</div></div>`:''}
   ${e.history?.length?`<div class="bw-sect">Password history (${e.history.length})</div><div class="bw-card">${e.history.map((h,i)=>`<div class="bw-row"><div class="grow"><div class="bw-lab">${new Date(h.changedAt).toLocaleString()}</div><div class="bw-val" id="hist-${i}">••••••••</div></div><button class="eicon" data-hshow="${i}" title="Show/hide">${icon('eye')}</button><button class="eicon" data-hcopy="${i}" title="Copy">${icon('copy')}</button><button class="eicon" data-hrest="${i}" title="Restore this password">${icon('restore')}</button></div>`).join('')}</div>`:''}
@@ -1087,37 +1173,42 @@ function renderDetail(){
     :`<button class="bw-edit" id="dEdit">Edit</button><button class="bw-trash" id="dTrash" title="Move to bin">${icon('trash')}</button>`}
   </div>`;
   let shown=false, hideH=null;
+  const needAuth=e.reprompt===true;
+  const gate=fn=>needAuth?async(...a)=>{if(await confirmMaster())await fn(...a);}:fn;
   const maskPw=()=>{shown=false;$('pwMask').textContent='••••••••';$('dShow').innerHTML=icon('eye');if($('hideNote'))$('hideNote').textContent='hidden';clearTimeout(hideH);};
-  if($('dShow'))$('dShow').onclick=()=>{
+  if($('dShow'))$('dShow').onclick=gate(()=>{
     shown=!shown;
     if(shown){
       $('pwMask').textContent=e.password;$('dShow').innerHTML=icon('eyeOff');if($('hideNote'))$('hideNote').textContent='auto-hides in 15s';
       clearTimeout(hideH);hideH=setTimeout(maskPw,15000); /* passwords never stay visible */
     } else maskPw();
-  };
+  });
   /* card secrets: masked reveal with auto-hide */
-  const wireMask=(btn,msk,get)=>{let s=false,h=null;const m=()=>{s=false;$(msk).textContent=msk==='cardMask'?cardMasked:'••••';$(btn).innerHTML=icon('eye');clearTimeout(h);};$(btn).onclick=()=>{s=!s;if(s){$(msk).textContent=get();$(btn).innerHTML=icon('eyeOff');clearTimeout(h);h=setTimeout(m,15000);}else m();};};
+  const wireMask=(btn,msk,get)=>{let s=false,h=null;const m=()=>{s=false;$(msk).textContent=msk==='cardMask'?cardMasked:'••••';$(btn).innerHTML=icon('eye');clearTimeout(h);};$(btn).onclick=gate(async()=>{s=!s;if(s){$(msk).textContent=get();$(btn).innerHTML=icon('eyeOff');clearTimeout(h);h=setTimeout(m,15000);}else m();});};
   if($('dShowCard'))wireMask('dShowCard','cardMask',()=>card.number||'');
   if($('dShowCvv'))wireMask('dShowCvv','cvvMask',()=>card.cvv||'');
+  if($('dShowSshPriv'))wireMask('dShowSshPriv','sshPrivMask',()=>ssh.priv||'');
+  if($('dShowSshPass'))wireMask('dShowSshPass','sshPassMask',()=>ssh.pass||'');
+  box.querySelectorAll('[data-sshcopy]').forEach(b=>b.onclick=gate(()=>copyText(ssh[b.dataset.sshcopy]||'')));
   /* custom hidden fields */
-  box.querySelectorAll('[data-cfshow]').forEach(b=>b.onclick=()=>{const i=+b.dataset.cfshow,el=$('cf-'+i);if(el.textContent==='••••••••'){el.textContent=e.custom[i].v;b.innerHTML=icon('eyeOff');}else{el.textContent='••••••••';b.innerHTML=icon('eye');}});
-  box.querySelectorAll('[data-cfcopy]').forEach(b=>b.onclick=()=>copyText(e.custom[+b.dataset.cfcopy].v));
+  box.querySelectorAll('[data-cfshow]').forEach(b=>b.onclick=gate(()=>{const i=+b.dataset.cfshow,el=$('cf-'+i);if(el.textContent==='••••••••'){el.textContent=e.custom[i].v;b.innerHTML=icon('eyeOff');}else{el.textContent='••••••••';b.innerHTML=icon('eye');}}));
+  box.querySelectorAll('[data-cfcopy]').forEach(b=>b.onclick=gate(()=>copyText(e.custom[+b.dataset.cfcopy].v)));
   /* history: reveal one at a time, auto re-mask, copy, restore */
-  box.querySelectorAll('[data-hshow]').forEach(b=>b.onclick=()=>{
+  box.querySelectorAll('[data-hshow]').forEach(b=>b.onclick=gate(()=>{
     const i=+b.dataset.hshow, el=$('hist-'+i);
     const isMasked=el.textContent==='••••••••';
     box.querySelectorAll('[id^="hist-"]').forEach(x=>x.textContent='••••••••');
     if(isMasked){el.textContent=e.history[i].password;clearTimeout(el._h);el._h=setTimeout(()=>el.textContent='••••••••',15000);}
-  });
-  box.querySelectorAll('[data-hcopy]').forEach(b=>b.onclick=()=>copyText(e.history[+b.dataset.hcopy].password));
-  box.querySelectorAll('[data-hrest]').forEach(b=>b.onclick=async()=>{
+  }));
+  box.querySelectorAll('[data-hcopy]').forEach(b=>b.onclick=gate(()=>copyText(e.history[+b.dataset.hcopy].password)));
+  box.querySelectorAll('[data-hrest]').forEach(b=>b.onclick=gate(async()=>{
     const i=+b.dataset.hrest, old=e.history[i].password;
     e.history.unshift({password:e.password,changedAt:Date.now()});e.history=e.history.slice(0,10);
     e.password=old;e.updatedAt=Date.now();await persist();renderAll();toast('Restored password from history');
-  });
-  if($('dOpen'))$('dOpen').onclick=()=>{let u=e.url;if(!/^https?:\/\//i.test(u))u='https://'+u;window.open(u,'_blank');};
+  }));
+  box.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>window.open(b.dataset.open,'_blank'));
   box.querySelectorAll('.bw-val').forEach(v=>{if(v.textContent.trim()&&!/^•+$/.test(v.textContent.trim()))v.title=v.textContent;});
-  box.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>copyText(b.dataset.c));
+  box.querySelectorAll('[data-c]').forEach(b=>b.onclick=gate(()=>copyText(b.dataset.c)));
   if($('dEdit'))$('dEdit').onclick=()=>openEntryModal(e);
   $('dClose').onclick=()=>{selectedId=null;renderList();renderDetail();};
   if($('dTrash'))$('dTrash').onclick=()=>{e.trashed=true;e.trashedAt=Date.now();e.updatedAt=Date.now();persist().then(renderAll);toast('Moved to Bin');};
@@ -1141,22 +1232,25 @@ async function startTotp(secret){
   const tick=async()=>{try{if($('totpCode'))$('totpCode').textContent=await totp(secret);const left=30-new Date().getSeconds()%30;if($('totpCount'))$('totpCount').textContent=left;if($('totpBar'))$('totpBar').style.width=(left/30*100)+'%';}catch{if($('totpCode'))$('totpCode').textContent='invalid secret';}};
   tick();totpTimer=setInterval(tick,1000);
 }
-window.copyTotp=async()=>{const c=$('totpCode')?.textContent;if(c&&/^\d{6}$/.test(c))copyText(c);};
+window.copyTotp=async()=>{const c=$('totpCode')?.textContent;if(c&&/^\d{6}$/.test(c)){const se=VAULT.entries.find(x=>x.id===selectedId);if(se?.reprompt&&!await confirmMaster())return;copyText(c);}};
 
 /* ============ entry modal ============ */
 function fillFolderSel(sel,cur){sel.innerHTML='<option value="">No folder</option>'+VAULT.folders.map(f=>`<option value="${f.id}" ${f.id===cur?'selected':''}>${esc(f.name)}</option>`).join('');}
-$('addBtn').onclick=()=>openEntryModal(null);
+$('addBtn').onclick=ev=>{ev.stopPropagation();$('addMenu').classList.toggle('hidden');};
+document.querySelectorAll('#addMenu [data-add]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();$('addMenu').classList.add('hidden');const a=b.dataset.add;if(a==='folder'){$('addFolderBtn').click();return;}openEntryModal(null);setEntryType(a);});
 /* ---- items 4+5: item types (login/card/identity/note) + custom fields + duplicate warning ---- */
-let entryType='login', customEd=[];
-const TYPELBL={login:'login',card:'card',identity:'identity',note:'note'};
+let entryType='login', customEd=[], uriEd=[''];
 function setEntryType(t){
   entryType=t;
   document.querySelectorAll('#typeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.type===t));
   $('fLogin').classList.toggle('hidden',t!=='login');
   $('fCard').classList.toggle('hidden',t!=='card');
   $('fIdn').classList.toggle('hidden',t!=='identity');
-  $('entryTitle').textContent=($('eId').value?'Edit ':'New ')+TYPELBL[t];
+  $('fSsh').classList.toggle('hidden',t!=='sshkey');
+  $('entryTitle').textContent=($('eId').value?'Edit ':'Add ')+(ETYPES[t]||t);
   $('eNotesLbl').textContent=t==='note'?'Note text':'Notes';
+  $('addlLbl').textContent=t==='note'?'Note':'Additional options';
+  $('eNotes').style.minHeight=t==='note'?'200px':'';
   entryDirty();
 }
 document.querySelectorAll('#typeSeg button').forEach(b=>b.onclick=()=>setEntryType(b.dataset.type));
@@ -1182,18 +1276,57 @@ function closeEntryModal(){if(_dirty&&!confirm('Discard unsaved changes?'))retur
 function openEntryModal(e){
   $('eId').value=e?.id||'';
   $('eName').value=e?.name||'';$('eUser').value=e?.username||'';
-  $('eUrl').value=e?.url||'';$('ePass').value=e?.password||'';$('eTotp').value=e?.totp||'';
+  $('ePass').value=e?.password||'';$('eTotp').value=e?.totp||'';
+  uriEd=(e?.urls&&e.urls.length?[...e.urls]:(e?.url?[e.url]:['']));renderUriEd();
   const c=e?.card||{};$('cHolder').value=c.holder||'';$('cNumber').value=c.number||'';$('cExp').value=c.exp||'';$('cCvv').value=c.cvv||'';
   const idn=e?.idn||{};$('iFirst').value=idn.first||'';$('iLast').value=idn.last||'';$('iEmail').value=idn.email||'';$('iPhone').value=idn.phone||'';$('iAddr').value=idn.address||'';
+  const ssh=e?.ssh||{};$('sPriv').value=ssh.priv||'';$('sPub').value=ssh.pub||'';$('sPass').value=ssh.pass||'';$('sPass').type='password';
   customEd=(e?.custom||[]).map(f=>({n:f.n||'',v:f.v||'',h:!!f.h}));renderCustomEd();
-  $('eNotes').value=e?.notes||'';$('eFav').checked=!!e?.favorite;
+  $('eNotes').value=e?.notes||'';$('eFav').checked=!!e?.favorite;$('eFavStar').classList.toggle('on',!!e?.favorite);$('eReprompt').checked=!!e?.reprompt;
   $('ePass').type='password';$('cNumber').type='password';
   fillFolderSel($('eFolder'),e?.folderId||'');paintBar($('ePassBar'),$('ePass').value);
   setEntryType(e?.type||'login');
+  $('typeSeg').style.display=e?.id?'':'none'; /* type fixed at creation via + Add menu */
   $('entryModal').classList.remove('hidden');fillIconsIn($('entryModal'));entryDirty(false);$('eName').focus();
 }
 $('cShow').onclick=()=>{const i=$('cNumber');i.type=i.type==='password'?'text':'password';};
 $('cCopy').onclick=()=>copyText($('cNumber').value);
+$('sPrivCopy').onclick=()=>copyText($('sPriv').value.trim());
+$('sPubCopy').onclick=()=>copyText($('sPub').value.trim());
+$('sPassShow').onclick=()=>{const i=$('sPass');i.type=i.type==='password'?'text':'password';};
+$('sPassCopy').onclick=()=>copyText($('sPass').value);
+$('eX').onclick=()=>closeEntryModal();
+$('eFavStar').onclick=()=>{const c=$('eFav');c.checked=!c.checked;$('eFavStar').classList.toggle('on',c.checked);entryDirty();};
+$('eTotpShow').onclick=()=>{const i=$('eTotp');i.type=i.type==='password'?'text':'password';};
+$('eGenHint').onclick=()=>$('eGen').click();
+/* ---- Bitwarden-style username generator (2 words + digits, offline) ---- */
+function genUsername(){
+  const w=WORDS.filter(x=>x.length>2);
+  return (w[randInt(w.length)]+w[randInt(w.length)]+randInt(100)).toLowerCase();
+}
+$('eUserGen').onclick=()=>{$('eUser').value=genUsername();entryDirty();toast('Username generated');};
+/* ---- multiple website URIs (first is primary) ---- */
+function renderUriEd(){
+  const box=$('uriRows');box.innerHTML='';
+  uriEd.forEach((u,i)=>{
+    const d=document.createElement('div');d.className='uri-row';
+    d.innerHTML=`<input type="text" placeholder="https://…" value="${esc(u)}" /><button class="iconbtn" data-ugo title="Open website">${icon('open')}</button>${uriEd.length>1?'<button class="iconbtn" data-ux title="Remove">✕</button>':''}`;
+    d.querySelector('input').oninput=ev=>{uriEd[i]=ev.target.value;entryDirty();};
+    d.querySelector('[data-ugo]').onclick=()=>{const v=(uriEd[i]||'').trim();if(!v)return toast('Enter a website first');window.open(/^https?:\/\//i.test(v)?v:'https://'+v,'_blank');};
+    const x=d.querySelector('[data-ux]');if(x)x.onclick=()=>{uriEd.splice(i,1);renderUriEd();entryDirty();};
+    box.appendChild(d);
+  });
+}
+$('uriAdd').onclick=()=>{if(uriEd.length>=5)return toast('Maximum 5 websites');uriEd.push('');renderUriEd();entryDirty();};
+/* ---- master password re-prompt: gate viewing/copying secrets ---- */
+async function confirmMaster(){
+  const pw=prompt('Enter master password to continue:');if(!pw)return false;
+  try{
+    const blob=loadBlob();if(!blob)return false;
+    const key=await deriveKey(pw,blob.salt,blob.iterations);
+    await decryptVault(key,blob);return true;
+  }catch{toast('Wrong master password');return false;}
+}
 function dupSuggestion(type,data,selfId){
   const same=(a,b)=>(a||'').toLowerCase()===(b||'').toLowerCase();
   return VAULT.entries.find(x=>x.id!==selfId&&!x.trashed&&(x.type||'login')===type&&same(x.name,data.name)&&(
@@ -1207,12 +1340,15 @@ $('eSave').onclick=async()=>{
   const id=$('eId').value,name=$('eName').value.trim()||'(no name)';
   const card={holder:$('cHolder').value.trim(),number:$('cNumber').value.replace(/\s/g,''),exp:$('cExp').value.trim(),cvv:$('cCvv').value};
   const idn={first:$('iFirst').value.trim(),last:$('iLast').value.trim(),email:$('iEmail').value.trim(),phone:$('iPhone').value.trim(),address:$('iAddr').value};
+  const ssh={priv:$('sPriv').value.trim(),pub:$('sPub').value.trim(),pass:$('sPass').value};
   const custom=customEd.filter(f=>f.n.trim()||f.v).map(f=>({n:f.n.trim(),v:f.v,h:!!f.h}));
-  const data={type:entryType,name,username:$('eUser').value.trim(),url:$('eUrl').value.trim(),password:$('ePass').value,totp:$('eTotp').value.replace(/\s/g,''),card,idn,custom,notes:$('eNotes').value,folderId:$('eFolder').value||null,favorite:$('eFav').checked};
+  const uriVals=[...document.querySelectorAll('#uriRows input')].map(i=>i.value.trim()).filter(Boolean);
+  const data={type:entryType,name,username:$('eUser').value.trim(),url:uriVals[0]||'',urls:uriVals,password:$('ePass').value,totp:$('eTotp').value.replace(/\s/g,''),card,idn,ssh,custom,notes:$('eNotes').value,folderId:$('eFolder').value||null,favorite:$('eFav').checked,reprompt:$('eReprompt').checked};
   if(entryType==='login'&&!data.password)return toast('Password is empty');
   if(entryType==='card'&&!data.card.number)return toast('Card number is empty');
   if(entryType==='identity'&&!data.idn.first&&!data.idn.email)return toast('Add a name or email');
   if(entryType==='note'&&!data.notes.trim())return toast('Note text is empty');
+  if(entryType==='sshkey'&&!data.ssh.priv)return toast('Private key is empty');
   const dup=dupSuggestion(entryType,data,id); /* item 5: warn on manual duplicates */
   if(dup&&!confirm(`A similar ${entryType} "${dup.name}" already exists. Save anyway?`))return;
   if(id){const e=VAULT.entries.find(x=>x.id===id);if(entryType==='login'&&e.password!==data.password&&e.password){e.history=e.history||[];e.history.unshift({password:e.password,changedAt:Date.now()});e.history=e.history.slice(0,10);}Object.assign(e,data,{updatedAt:Date.now()});selectedId=id;}
@@ -1316,6 +1452,8 @@ async function maybeAutoBackup(){
   if(await takeAutoSnapshot(true))toast('Weekly automatic backup saved');
   refreshBackupBanner();
 }
+/* hourly re-check so long-open sessions also snapshot every week (unlock already checks) */
+setInterval(()=>{if(!MASTER_KEY||!VAULT.entries.length)return;const m=loadMeta();if(m.autoBackupOn!==false&&(!m.lastAuto||Date.now()-m.lastAuto>=WEEK))maybeAutoBackup();},3600e3);
 function backupFileDue(){const t=loadMeta().lastBackup;return !t||Date.now()-t>WEEK;}
 function refreshBackupBanner(){
   const el=$('backupBanner');if(!el)return;
@@ -1423,18 +1561,18 @@ async function doCopyExportJson(){
 };
 function doExportCsv(){
   /* CSV opens directly in Excel; includes all item types + custom fields (as JSON) */
-  const H=['type','name','username','password','url','totp','notes','folder','favorite','cardholder','cardnumber','cardexp','cardcvv','firstname','lastname','email','phone','address','custom'];
+  const H=['type','name','username','password','url','totp','notes','folder','favorite','cardholder','cardnumber','cardexp','cardcvv','firstname','lastname','email','phone','address','sshpub','sshpriv','sshpass','custom'];
   const rows=[H.join(',')];
-  for(const e of liveNonTrash()){const c=e.card||{},n=e.idn||{};
-    rows.push([e.type||'login',e.name,e.username,e.password,e.url,e.totp||'',(e.notes||'').replace(/\r?\n/g,' '),folderName(e.folderId),e.favorite?'1':'',c.holder||'',c.number||'',c.exp||'',c.cvv||'',n.first||'',n.last||'',n.email||'',n.phone||'',(n.address||'').replace(/\r?\n/g,' '),JSON.stringify(e.custom||[])].map(csvCell).join(','));}
+  for(const e of liveNonTrash()){const c=e.card||{},n=e.idn||{},s=e.ssh||{};
+    rows.push([e.type||'login',e.name,e.username,e.password,e.url,e.totp||'',(e.notes||'').replace(/\r?\n/g,' '),folderName(e.folderId),e.favorite?'1':'',c.holder||'',c.number||'',c.exp||'',c.cvv||'',n.first||'',n.last||'',n.email||'',n.phone||'',(n.address||'').replace(/\r?\n/g,' '),s.pub||'',s.priv||'',s.pass||'',JSON.stringify(e.custom||[])].map(csvCell).join(','));}
   downloadBlob(new Blob(['\ufeff'+rows.join('\r\n')],{type:'text/csv;charset=utf-8'}),'LocalVault-export.csv');
   stampBackup();toast('Exported CSV — opens in Excel (passwords visible, delete after use)');
 };
 function doExportXls(){
   /* Genuine .xls via SpreadsheetML table — opens in Excel/LibreOffice, no internet needed */
-  const H=['Type','Name','Username','Password','URL','TOTP','Notes','Folder','Favorite','Cardholder','Card number','Expiry','CVV','First','Last','Email','Phone','Address'];
-  const rows=liveNonTrash().map(e=>{const c=e.card||{},n=e.idn||{};
-    return `<Row>${[e.type||'login',e.name,e.username,e.password,e.url,e.totp||'',e.notes||'',folderName(e.folderId),e.favorite?'yes':'',c.holder||'',c.number||'',c.exp||'',c.cvv||'',n.first||'',n.last||'',n.email||'',n.phone||'',n.address||''].map(x=>`<Cell><Data ss:Type="String">${esc(x)}</Data></Cell>`).join('')}</Row>`;}).join('');
+  const H=['Type','Name','Username','Password','URL','TOTP','Notes','Folder','Favorite','Cardholder','Card number','Expiry','CVV','First','Last','Email','Phone','Address','SSH public','SSH private','SSH passphrase'];
+  const rows=liveNonTrash().map(e=>{const c=e.card||{},n=e.idn||{},s=e.ssh||{};
+    return `<Row>${[e.type||'login',e.name,e.username,e.password,e.url,e.totp||'',e.notes||'',folderName(e.folderId),e.favorite?'yes':'',c.holder||'',c.number||'',c.exp||'',c.cvv||'',n.first||'',n.last||'',n.email||'',n.phone||'',n.address||'',s.pub||'',s.priv||'',s.pass||''].map(x=>`<Cell><Data ss:Type="String">${esc(x)}</Data></Cell>`).join('')}</Row>`;}).join('');
   const xml=`<?xml version="1.0"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Vault"><Table><Row>${H.map(h=>`<Cell><Data ss:Type="String">${h}</Data></Cell>`).join('')}</Row>${rows}</Table></Worksheet></Workbook>`;
   downloadBlob(new Blob([xml],{type:'application/vnd.ms-excel'}),'LocalVault-export.xls');
   stampBackup();toast('Exported Excel .xls (passwords visible, delete after use)');
@@ -1473,16 +1611,17 @@ function parseCsv(text){
   if(cur.length>1||cur[0]!=='')rows.push(cur);
   return rows.filter(r=>r.some(x=>x.trim()!==''));
 }
-const COLMAP={type:['type','item type','kind'],name:['name','title','account'],username:['username','user','email','login_username','login username'],password:['password','pass','login_password','login password'],url:['url','link','website','login_uri','login uri'],totp:['totp','2fa','authenticator'],notes:['notes','note','comments'],folder:['folder','group','collection'],favorite:['favorite','fav','star'],cardholder:['cardholder','card holder','name on card'],cardnumber:['cardnumber','card number','number','cc'],cardexp:['cardexp','expiry','exp','expires'],cardcvv:['cardcvv','cvv','cvc'],firstname:['firstname','first name','fname'],lastname:['lastname','last name','lname'],email:['email','e-mail'],phone:['phone','tel','mobile'],address:['address','street'],custom:['custom','custom fields','fields']};
+const COLMAP={type:['type','item type','kind'],name:['name','title','account'],username:['username','user','email','login_username','login username'],password:['password','pass','login_password','login password'],url:['url','link','website','login_uri','login uri'],totp:['totp','2fa','authenticator'],notes:['notes','note','comments'],folder:['folder','group','collection'],favorite:['favorite','fav','star'],cardholder:['cardholder','card holder','name on card'],cardnumber:['cardnumber','card number','number','cc'],cardexp:['cardexp','expiry','exp','expires'],cardcvv:['cardcvv','cvv','cvc'],firstname:['firstname','first name','fname'],lastname:['lastname','last name','lname'],email:['email','e-mail'],phone:['phone','tel','mobile'],address:['address','street'],sshpub:['sshpub','ssh public','public key','ssh public key'],sshpriv:['sshpriv','ssh private','private key','ssh private key'],sshpass:['sshpass','ssh passphrase','passphrase','key passphrase'],custom:['custom','custom fields','fields']};
 function mapRow(h,row){
   const get=(...keys)=>{for(const k of keys){const i=h.indexOf(k);if(i>=0&&row[i]!==undefined)return row[i].trim();}return '';};
   const pick=aliases=>{for(const a of aliases){const v=get(a);if(v)return v;}return '';};
   const ty=(pick(COLMAP.type)||'login').toLowerCase();
-  const type=['login','card','identity','note'].includes(ty)?ty:'login';
+  const type=['login','card','identity','note','sshkey'].includes(ty)?ty:'login';
   let custom=[];try{const c=JSON.parse(pick(COLMAP.custom)||'[]');if(Array.isArray(c))custom=c.filter(f=>f&&(f.n||f.v)).map(f=>({n:String(f.n||''),v:String(f.v||''),h:!!f.h}));}catch{}
   return {type,name:pick(COLMAP.name)||'(imported)',username:pick(COLMAP.username),password:pick(COLMAP.password),url:pick(COLMAP.url),totp:pick(COLMAP.totp).replace(/\s/g,''),notes:pick(COLMAP.notes),folder:pick(COLMAP.folder),favorite:/^(1|y|yes|true|\*|\u2605)/i.test(pick(COLMAP.favorite)),
     card:{holder:pick(COLMAP.cardholder),number:pick(COLMAP.cardnumber).replace(/\s/g,''),exp:pick(COLMAP.cardexp),cvv:pick(COLMAP.cardcvv)},
-    idn:{first:pick(COLMAP.firstname),last:pick(COLMAP.lastname),email:pick(COLMAP.email),phone:pick(COLMAP.phone),address:pick(COLMAP.address)},custom};
+    idn:{first:pick(COLMAP.firstname),last:pick(COLMAP.lastname),email:pick(COLMAP.email),phone:pick(COLMAP.phone),address:pick(COLMAP.address)},
+    ssh:{pub:pick(COLMAP.sshpub),priv:pick(COLMAP.sshpriv),pass:pick(COLMAP.sshpass)},custom};
 }
 let pendingImport=[];
 $('impAnyFile').onchange=async ev=>{
@@ -1503,13 +1642,13 @@ $('impAnyFile').onchange=async ev=>{
     let raw=[];
     if(/\.json$/i.test(f.name)||t.trim().startsWith('{')){
       const j=JSON.parse(text);
-      raw=(j.entries||j.logins||[]).map(r=>({type:['login','card','identity','note'].includes((r.type||'').toLowerCase())?r.type.toLowerCase():'login',name:r.name||r.title||'(imported)',username:r.username||r.login_username||'',password:r.password||r.login_password||'',url:r.url||r.login_uri||'',totp:(r.totp||'').replace(/\s/g,''),notes:r.notes||'',folder:'',favorite:!!r.favorite,card:r.card||{holder:'',number:'',exp:'',cvv:''},idn:r.idn||{first:'',last:'',email:'',phone:'',address:''},custom:Array.isArray(r.custom)?r.custom:[]}));
+      raw=(j.entries||j.logins||[]).map(r=>({type:['login','card','identity','note','sshkey'].includes((r.type||'').toLowerCase())?r.type.toLowerCase():'login',name:r.name||r.title||'(imported)',username:r.username||r.login_username||'',password:r.password||r.login_password||'',url:r.url||r.login_uri||((r.urls||[])[0]||''),urls:Array.isArray(r.urls)?r.urls.filter(u=>typeof u==='string').map(u=>u.trim()).filter(Boolean).slice(0,5):(r.url||r.login_uri?[r.url||r.login_uri]:[]),totp:(r.totp||'').replace(/\s/g,''),notes:r.notes||'',folder:'',favorite:!!r.favorite,reprompt:!!r.reprompt,card:r.card||{holder:'',number:'',exp:'',cvv:''},idn:r.idn||{first:'',last:'',email:'',phone:'',address:''},ssh:{pub:(r.ssh||{}).pub||'',priv:(r.ssh||{}).priv||'',pass:(r.ssh||{}).pass||''},custom:Array.isArray(r.custom)?r.custom:[]}));
     }else{
       const rows=parseCsv(text);if(rows.length<2)throw new Error('CSV is empty');
       const h=rows[0].map(c=>c.trim().toLowerCase());
       raw=rows.slice(1).map(r=>mapRow(h,r));
     }
-    raw=raw.filter(r=>r.name||r.username||r.password||r.url);
+    raw=raw.filter(r=>r.name||r.username||r.password||r.url||(r.ssh&&(r.ssh.priv||r.ssh.pub)));
     if(!raw.length)throw new Error('no rows found');
     const pre=new Set(VAULT.entries.map(e=>[e.name,e.username,e.url].join('‬').toLowerCase()));
     pendingImport=raw.map(r=>({...r,dup:pre.has([r.name,r.username,r.url].join('‬').toLowerCase())}));
@@ -1529,7 +1668,7 @@ $('impMerge').onclick=async()=>{
       if(!fo){fo={id:uid(),name:r.folder};VAULT.folders.push(fo);}
       folderId=fo.id;
     }
-    VAULT.entries.push({id:uid(),type:r.type||'login',name:r.name,username:r.username,password:r.password,url:r.url,totp:r.totp,notes:r.notes,folderId,favorite:r.favorite,card:r.card||{holder:'',number:'',exp:'',cvv:''},idn:r.idn||{first:'',last:'',email:'',phone:'',address:''},custom:r.custom||[],trashed:false,trashedAt:0,history:[],createdAt:Date.now(),updatedAt:Date.now()});n++;
+    VAULT.entries.push({id:uid(),type:r.type||'login',name:r.name,username:r.username,password:r.password,url:r.url||((r.urls||[])[0]||''),urls:(r.urls&&r.urls.length?r.urls:(r.url?[r.url]:[])),totp:r.totp,notes:r.notes,folderId,favorite:r.favorite,reprompt:!!r.reprompt,card:r.card||{holder:'',number:'',exp:'',cvv:''},idn:r.idn||{first:'',last:'',email:'',phone:'',address:''},ssh:r.ssh||{pub:'',priv:'',pass:''},custom:r.custom||[],trashed:false,trashedAt:0,history:[],createdAt:Date.now(),updatedAt:Date.now()});n++;
   }
   pendingImport=[];$('impPrevModal').classList.add('hidden');
   await persist();renderAll();toast(`Imported ${n} logins`);
