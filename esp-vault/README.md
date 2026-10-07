@@ -171,6 +171,7 @@ esp-vault/
 
 ## ⚠️ Limitations (honest)
 
+- **Capacity** — RAM limits the vault file size: ~40–80 items on D1 Mini (24 KB limit), or ~300+ items on ESP32/Pico W (96 KB limit).
 - **Plain HTTP** — vault works because we inject a WebCrypto polyfill, but traffic is visible on LAN. For sensitive use, put device on a trusted network or add TLS (mkcert + cert upload).
 - **No RTC** — `savedAt` in `/api/store` uses `millis()` (uptime), not wall time.
 - **Single-user** — no auth on device API; anyone on LAN can read/write vault ciphertext.
