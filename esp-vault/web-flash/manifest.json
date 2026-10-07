@@ -1,0 +1,28 @@
+{
+  "name": "LocalVault ESP",
+  "version": "1.0.0",
+  "home_assistant_domain": "localvault",
+  "funding_url": "https://github.com/sponsors/papercodeIN",
+  "new_install_prompt_erase": true,
+  "new_install_improv_wait_time": 15,
+  "builds": [
+    {
+      "chipFamily": "ESP32-C3",
+      "parts": [
+        { "path": "firmware_esp32c3.bin", "offset": 0 }
+      ]
+    },
+    {
+      "chipFamily": "ESP8266",
+      "parts": [
+        { "path": "firmware_d1_mini.bin", "offset": 0 }
+      ]
+    },
+    {
+      "chipFamily": "RP2040",
+      "parts": [
+        { "path": "firmware_pico_w.uf2", "offset": 0 }
+      ]
+    }
+  ]
+}
