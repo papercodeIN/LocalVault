@@ -68,10 +68,28 @@ Everything stored is **ciphertext** (AES-256-GCM, keys from PBKDF2-SHA-256). The
 
 ## ⚠️ Honest limitations
 
+**True for both modes**
+
 - **One browser profile = one vault.** Chrome ≠ Edge ≠ Firefox. Use export/restore (or the server address, which pulls from disk) to move between them — one at a time, it's not live sync.
-- **No password reset emails.** There is no server to email you. The recovery key *is* the reset.
+- **No password reset emails.** There is no server to email you. The recovery key *is* the reset — so anyone holding it can reset your password too.
 - **Offline means you own backups.** Download the encrypted backup monthly to a USB stick.
-- **Weekly backup = at first unlock after 7 days.** A sleeping PC can't snapshot itself.
+- **Weekly backup = at first unlock after 7 days** (an hourly check catches long-open sessions). A sleeping PC can't snapshot itself, and only the newest 4 snapshots are kept.
+- **No idle auto-lock.** The vault stays unlocked until you click **Lock** or close the tab.
+- **Only the encrypted backup file is safe to park on disk** — CSV, Excel and plain JSON exports show passwords in the clear.
+
+**📄 Direct HTML (`LocalVault.html`)**
+
+- **Zero redundancy.** Everything lives in that browser's `localStorage` — clearing cookies/site data wipes the vault *and* all 4 snapshots. There is no second copy anywhere.
+- **Small ceiling.** Storage is bounded by browser `localStorage` quota (a few MB), not the server's 25 MB cap.
+- **No server, no sync.** Double-click works anywhere — and also means the only way to move a vault is manual export/restore.
+
+**🖥️ Self-hosted (`selfhosted/`)**
+
+- **The server must be running** or the page won't load at all. `node setup.js` installs login autostart; otherwise start it by hand.
+- **No authentication on the API.** Any process on your machine can read or overwrite the ciphertext — which is why it binds `127.0.0.1` and must never be port-forwarded.
+- **Last write wins, no merge.** Each save pushes the whole vault; editing in two browsers at once means the later save silently overwrites the earlier one. Reopen the tab to pull from disk.
+- **Sync failures are silent.** If the server dies mid-session, changes just stay browser-local with no warning — the disk copy catches up on the next successful save.
+- **Weekly snapshots are not mirrored.** Only the vault, settings and recovery key reach `vault.store.json`; clear browser storage and the vault reloads from disk, but the 4 snapshots are gone.
 
 ---
 

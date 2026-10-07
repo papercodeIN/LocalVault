@@ -73,6 +73,20 @@ Your browser treats the server address as a *new home*, so the old vault doesn't
 
 ---
 
+## ⚠️ Honest limitations
+
+Applies to server mode only — the general ones (one browser profile per origin, no reset emails, weekly backup needs an unlock every 7 days, no idle auto-lock, plaintext CSV/Excel exports) are in the [main README](../README.md).
+
+- **Node has to be up.** No process → no page. Install autostart with `node setup.js`, or keep `start-windows.bat` handy.
+- **No auth on `/api/store`.** It validates shape, not identity — any local process can read or overwrite the ciphertext. Loopback-only binding *is* the security boundary; don't move the host or port-forward it.
+- **Last write wins, no merge.** A save PUTs the entire vault (`server.js:97`). Two unlocked browsers will silently overwrite each other — use one at a time and reopen the tab to pull the disk copy.
+- **Sync errors are swallowed.** A stopped server means saves stay in `localStorage` with no on-screen warning; the disk mirror lags until a save succeeds again.
+- **Only `blob`, `meta` and `rec` are mirrored.** The 4 weekly snapshots (`localvault.auto.v1`) stay browser-side — clear site data and they're gone even though the vault reloads from `vault.store.json`.
+- **Moving between `file://` and this server is manual.** New origin = fresh storage — see **First run** above.
+- **25 MB body cap**, and `vault.store.json` is git-ignored — back it up yourself.
+
+---
+
 ## ❓ FAQ
 
 <details>
