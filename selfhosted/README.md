@@ -75,15 +75,15 @@ Your browser treats the server address as a *new home*, so the old vault doesn't
 
 ## ⚠️ Honest limitations
 
-Applies to server mode only — the general ones (one browser profile per origin, no reset emails, weekly backup needs an unlock every 7 days, no idle auto-lock, plaintext CSV/Excel exports) are in the [main README](../README.md).
+What this server version can't do, in plain words. The general ones (no syncing, no password-reset emails, no automatic lock, backups only when you open it) are covered in the [main README](../README.md).
 
-- **Node has to be up.** No process → no page. Install autostart with `node setup.js`, or keep `start-windows.bat` handy.
-- **No auth on `/api/store`.** It validates shape, not identity — any local process can read or overwrite the ciphertext. Loopback-only binding *is* the security boundary; don't move the host or port-forward it.
-- **Last write wins, no merge.** A save PUTs the entire vault (`server.js:97`). Two unlocked browsers will silently overwrite each other — use one at a time and reopen the tab to pull the disk copy.
-- **Sync errors are swallowed.** A stopped server means saves stay in `localStorage` with no on-screen warning; the disk mirror lags until a save succeeds again.
-- **Only `blob`, `meta` and `rec` are mirrored.** The 4 weekly snapshots (`localvault.auto.v1`) stay browser-side — clear site data and they're gone even though the vault reloads from `vault.store.json`.
-- **Moving between `file://` and this server is manual.** New origin = fresh storage — see **First run** above.
-- **25 MB body cap**, and `vault.store.json` is git-ignored — back it up yourself.
+- **It only works while the program is running.** If LocalVault isn't running, the page won't open. Run `node setup.js` once to have it start automatically when you log in.
+- **There's no password on the server itself.** Anyone using this computer can reach it. Your passwords stay encrypted, so they can't be read — but another program could overwrite your saved file. That's why it stays on your own machine and must never be opened to your network.
+- **Don't use two browsers at the same time.** Any browser can open this address and will pick up the latest saved copy when it starts — so moving between Chrome and Firefox needs no exporting. But if two are open at once, whichever saves last overwrites the other's changes. Use one at a time, and reopen the tab to get the newest version.
+- **It won't warn you if it loses connection.** If the program stops while you're working, your changes wait in the browser and get saved later — no error message appears.
+- **Weekly snapshots stay in your browser.** Your vault is saved to a file on your disk, but the weekly snapshots are not. Clear your browser data and the vault comes back; the snapshots don't.
+- **Moving to or from the double-click file is manual.** The file version and this server version store data in different places, so you have to export from one and import into the other — see **First run** above.
+- **Back up `vault.store.json` yourself.** It's the copy on your disk, and Git deliberately ignores it so it never gets shared with anyone.
 
 ---
 
