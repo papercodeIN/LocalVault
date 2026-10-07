@@ -1,0 +1,12 @@
+{
+  "name": "localvault-server",
+  "version": "1.0.0",
+  "description": "Self-hosted loopback server for LocalVault — same UI, auto-starts on login, loopback-only.",
+  "type": "commonjs",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node server.js",
+    "setup": "node setup.js"
+  },
+  "license": "MIT"
+}

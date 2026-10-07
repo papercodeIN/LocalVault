@@ -1,0 +1,3 @@
+# Encrypted vault store (local disk, created at runtime — never commit)
+vault.store.json
+vault.store.json.tmp
