@@ -93,26 +93,21 @@ Your browser treats the server address as a *new home*, so the old vault doesn't
 
 ---
 
-## 🛡️ Important security and data notes
+## 🛡️ Keep your vault safe
 
-- The server binds to `127.0.0.1` only; it is for this computer and is not reachable from other devices by default. Do not port-forward it or expose it to the internet.
-- The server stores encrypted data and cannot read vault contents, but anyone with access to your computer can copy or delete the store. Protect the computer and keep separate backups.
-- Save the recovery key shown at vault creation. There is no password reset; changing the master password or security level invalidates the previous recovery key. See the [main README](../README.md) for other app-wide limitations.
-- `vault.store.json` is the server's persistent encrypted mirror, not a backup strategy. Keep an encrypted backup somewhere separate from this computer.
-- Weekly snapshots are stored in browser storage, not in `vault.store.json`; they do not follow you to another browser.
-- Exports such as CSV or plain JSON contain readable passwords. Store them securely and delete them when no longer needed; use encrypted backups for safekeeping.
-- When moving data from direct-file mode, export an encrypted backup first and verify the restored entries before relying on the server copy.
+- Save the recovery key shown when you create your vault. If you forget your master password, this key is the only way back in. A password or security-level change means you need a new recovery key.
+- Keep a backup somewhere separate from this computer. The server saves an encrypted copy on this computer, but that copy could still be lost if the computer fails.
+- The server is meant for this computer only. Do not make it available on the internet or to other devices.
+- CSV and plain JSON exports show your passwords in readable form. Keep them private and delete them when you are done.
+- When moving an existing vault, make an encrypted backup and check that it restored correctly before relying on the new copy.
 
----
+## ⚠️ What to expect
 
-## ⚠️ Self-hosted limitations
-
-- The server must be running to open the app through its URL. Use the optional login auto-start if desired.
-- There is no separate server login. Anyone using the computer can access the app page; the vault still requires its master password to unlock.
-- Browsers on this computer load/save the same server vault, but there is no live synchronization. Use one browser at a time: the newest save wins, and already-open tabs do not refresh automatically.
-- The server is local-only by default. It is not cloud sync, LAN sharing, or multi-user access.
-- **Direct-file mode only:** weekly snapshots remain in that browser and are not mirrored to the server disk.
-- App-wide limitations—including no password reset, no auto-lock, and the need to manage backups—are covered in the [main README](../README.md).
+- Keep the server running while using the server address. It can be set to start automatically when you sign in.
+- Each browser that uses the server address sees the same vault, but changes do not appear instantly in other open browsers. Use one browser at a time to avoid overwriting newer changes.
+- This is not cloud storage: it does not share your vault with other computers or people.
+- **When opening `LocalVault.html` directly:** weekly snapshots stay in that browser and are not copied to the server.
+- The app does not have password reset or automatic locking. See the [main README](../README.md) for details.
 
 ---
 
