@@ -192,7 +192,7 @@ section.list{flex:1;background:#fff;display:flex;flex-direction:column;min-heigh
 .entry:hover{background:#f4f7fc}.entry.active{background:#e8effc}
 .entry input[type=checkbox]{width:17px;height:17px;accent-color:#175ddc;cursor:pointer}
 .owner-pill{font-size:12px;color:#175ddc;background:#e8effc;border-radius:6px;padding:3px 10px;text-align:center;white-space:nowrap;overflow:hidden}
-.entry .eacts{display:flex;gap:2px;justify-content:flex-end}
+.entry .eacts{display:flex;gap:2px;justify-content:flex-end;justify-self:end;grid-column:4/6;white-space:nowrap;margin-left:auto}
 .rowmenu{position:absolute;right:14px;top:46px;background:#fff;border:1px solid #dfe5ee;border-radius:10px;box-shadow:0 12px 32px rgba(23,35,59,.18);z-index:30;min-width:190px;padding:5px;cursor:default}
 /* Bitwarden-style + Add dropdown */
 #addMenu{position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1px solid #dfe5ee;border-radius:12px;box-shadow:0 12px 32px rgba(23,35,59,.18);z-index:50;min-width:190px;padding:6px}
@@ -215,7 +215,7 @@ body.dark #addMenu .add-sep{border-color:#334155}
 .entry.active .nm{font-weight:700}
 .entry .un{font-size:13px;color:#5c6b82;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .entry .fav{color:#eab308}
-.entry .eacts{display:flex;gap:2px}
+/* eacts layout merged into rule above (right-aligned, spans last tracks) */
 .eicon{background:none;border:0;cursor:pointer;font-size:16px;padding:6px;border-radius:7px;color:#33415c}
 .eicon:hover{background:#e3e9f2}
 .eicon.danger{color:#c81e1e}
