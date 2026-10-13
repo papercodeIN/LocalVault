@@ -8,13 +8,13 @@ No accounts. No cloud. No tracking. No fees. Just one app that keeps your secret
 
 ## 🚀 Quick start (60 seconds)
 
-**Option A — double-click & go (simplest)**
+> ## 🔴 **OPTION A — DOUBLE-CLICK & GO (SIMPLEST)**
 
 1. Double-click `LocalVault.html` — opens in any browser, works fully offline.
 2. Create your vault → pick a strong master password (min 12 chars).
 3. 💾 **Save the recovery key** shown once — it's your only way back in if you forget the password.
 
-**Option B — run a local server**
+> ## 🔵 **OPTION B — RUN A LOCAL SERVER**
 
 On Windows, double-click `selfhosted/start-windows.bat`. On macOS or Linux, open a terminal and run:
 
