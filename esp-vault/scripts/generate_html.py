@@ -456,6 +456,12 @@ btn.onclick = submit;
       const el = document.getElementById(id);
       if (el) el.style.display = 'none';
     });
+    // 4. Export menu on ESP: keep only Device Backup (JSON) + CSV file.
+    //    Plain JSON / Copy JSON / Excel stay available in browser + selfhosted.
+    ['expSubJson', 'expSubCopy', 'expSubXls'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
   };
   window.deviceGate = async () => {
     const result = await deviceBoot();
