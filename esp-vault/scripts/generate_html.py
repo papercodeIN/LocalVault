@@ -282,7 +282,145 @@ btn.onclick = submit;
     try { toast(stored ? 'Vault loaded from device' : 'Vault created \u2014 add your first login'); } catch (e) {}
     return true;
   };
-  window.deviceGate = deviceBoot;
+  // ===== P1: Backup/Restore + Capacity Monitoring =====
+  const initBackupRestore = async () => {
+    // Add capacity indicator to settings
+    const settingsPanel = document.querySelector('.settings-content');
+    if (!settingsPanel) return;
+    
+    // Fetch health info for capacity
+    let healthData = null;
+    try {
+      const r = await fetch('/api/health', { cache: 'no-store' });
+      if (r.ok) healthData = await r.json();
+    } catch (e) {}
+    
+    if (healthData) {
+      // Create capacity indicator section
+      const capacitySection = document.createElement('div');
+      capacitySection.style.cssText = 'margin:1.5rem 0;padding:1.5rem;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0';
+      
+      const vaultUsage = healthData.vaultUsagePercent || 0;
+      const warningColor = vaultUsage > 80 ? '#dc2626' : (vaultUsage > 60 ? '#f59e0b' : '#10b981');
+      
+      capacitySection.innerHTML = 
+        '<h3 style="margin:0 0 1rem;font-size:1rem;font-weight:600;color:#0f172a">Storage Capacity</h3>'
+        + '<div style="display:flex;justify-content:space-between;margin-bottom:.5rem;font-size:.875rem;color:#64748b">'
+        + '<span>Used: ' + (healthData.vaultSize || 0) + ' / ' + (healthData.maxVaultSize || 0) + ' bytes</span>'
+        + '<span style="font-weight:600;color:' + warningColor + '">' + vaultUsage + '%</span>'
+        + '</div>'
+        + '<div style="width:100%;height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden">'
+        + '<div style="width:' + vaultUsage + '%;height:100%;background:' + warningColor + ';transition:width .3s ease"></div>'
+        + '</div>'
+        + '<div style="margin-top:.75rem;font-size:.8rem;color:#64748b">'
+        + 'Estimated: ' + (healthData.estimatedItems || 0) + ' / ' + (healthData.maxEstimatedItems || 0) + ' items'
+        + '</div>'
+        + (vaultUsage > 80 
+            ? '<div style="margin-top:1rem;padding:.75rem;background:#fee;border:1px solid #fca;border-radius:8px;font-size:.85rem;color:#dc2626">'
+            + '⚠️ Storage nearly full! Export backup now to prevent data loss.'
+            + '</div>' 
+            : '');
+      
+      // Dark mode styles
+      if (document.body.classList.contains('dark')) {
+        capacitySection.style.background = '#1e293b';
+        capacitySection.style.borderColor = '#334155';
+      }
+      
+      // Insert after general settings
+      const generalSection = settingsPanel.querySelector('h3');
+      if (generalSection && generalSection.parentElement) {
+        generalSection.parentElement.insertAdjacentElement('afterend', capacitySection);
+      }
+    }
+    
+    // Hook into existing Export navigation
+    const expNav = document.getElementById('expNav');
+    if (expNav) {
+      const originalExpClick = expNav.onclick;
+      expNav.onclick = async (e) => {
+        // Show device backup option in addition to standard export
+        const expSub = document.getElementById('expSub');
+        if (expSub && !expSub.querySelector('#deviceBackupBtn')) {
+          const backupBtn = document.createElement('div');
+          backupBtn.id = 'deviceBackupBtn';
+          backupBtn.className = 'exp-option';
+          backupBtn.innerHTML = '<span class="nic" data-icon="download"></span>Device Backup (JSON)';
+          backupBtn.onclick = async () => {
+            try {
+              const r = await fetch('/api/backup/export');
+              if (!r.ok) throw new Error('Backup failed');
+              const blob = await r.blob();
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'espvault-backup-' + new Date().toISOString().split('T')[0] + '.json';
+              a.click();
+              URL.revokeObjectURL(url);
+              try { toast('✅ Vault backup downloaded'); } catch (e2) {}
+            } catch (e) {
+              try { toast('❌ Backup failed: ' + e.message); } catch (e2) {}
+            }
+          };
+          expSub.insertBefore(backupBtn, expSub.firstChild);
+        }
+        if (originalExpClick) originalExpClick.call(expNav, e);
+      };
+    }
+    
+    // Hook into existing Import navigation
+    const impNav = document.getElementById('impNav');
+    if (impNav) {
+      const originalImpClick = impNav.onclick;
+      impNav.onclick = async (e) => {
+        // Add device restore option
+        const modal = document.querySelector('.modal');
+        if (modal && !modal.querySelector('#deviceRestoreBtn')) {
+          const restoreBtn = document.createElement('button');
+          restoreBtn.id = 'deviceRestoreBtn';
+          restoreBtn.textContent = '📦 Restore Device Backup';
+          restoreBtn.style.cssText = 'margin-top:1rem;width:100%;padding:.85rem;background:#6366f1;color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer';
+          restoreBtn.onclick = () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (ev) => {
+              const file = ev.target.files[0];
+              if (!file) return;
+              try {
+                const text = await file.text();
+                const backup = JSON.parse(text);
+                if (backup.type !== 'espvault-backup') throw new Error('Invalid backup file');
+                const r = await fetch('/api/backup/import', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: text
+                });
+                if (!r.ok) throw new Error('Restore failed');
+                try { toast('✅ Vault restored! Reloading...'); } catch (e2) {}
+                setTimeout(() => location.reload(), 1500);
+              } catch (e) {
+                try { toast('❌ Restore failed: ' + e.message); } catch (e2) {}
+              }
+            };
+            input.click();
+          };
+          const modalContent = modal.querySelector('.modal-content') || modal;
+          modalContent.appendChild(restoreBtn);
+        }
+        if (originalImpClick) originalImpClick.call(impNav, e);
+      };
+    }
+  };
+  
+  window.deviceGate = async () => {
+    const result = await deviceBoot();
+    if (result) {
+      // Initialize backup/restore UI after device boot
+      setTimeout(initBackupRestore, 500);
+    }
+    return result;
+  };
 })();
 '''
 
