@@ -67,16 +67,18 @@ The server only saves encrypted vault data; it cannot read your passwords. The e
 
 ---
 
-## ⚠️ Honest limitations
+## ⚠️ Important things to know
 
-- **No password reset.** There is no reset email — your recovery key is the only way back in. Anyone holding it can open your vault.
-- **No auto-lock.** It stays open until you click **Lock** or close the tab.
-- **Backups are on you.** A snapshot is saved once a week, but only when you open the app (keeps the last 4). Copy the encrypted backup to a USB stick now and then.
-- **Exports show passwords.** CSV, Excel and plain JSON are readable by anyone. Only the encrypted backup is safe to keep around.
+These apply whether you open the HTML file or use the local server:
 
-**📄 Open the HTML file:** Each browser has its own vault. If you clear that browser's saved data, its vault may be lost. Use an encrypted backup to move it to another browser.
+- **Keep your recovery key safe.** There is no password reset. If you forget your master password and lose the recovery key, you cannot unlock the vault. Anyone with the recovery key can unlock it.
+- **Lock the app when you finish.** It does not lock itself automatically.
+- **Make a backup you can keep elsewhere.** Weekly snapshots are saved quietly in the browser, not downloaded as files. Use **Download backup** in Settings to save an encrypted backup file, and keep a copy somewhere safe.
+- **Be careful with exports.** CSV, Excel, and plain JSON files show your passwords. Keep them private and delete them when you no longer need them.
 
-**🖥️ Use the local server:** Keep the server running while you use it. It is for this computer only, not for sharing over the internet or with other computers. Browsers opened at the server address use the same vault, but changes do not show up in other open tabs right away; use one browser at a time. Weekly snapshots stay in browser storage and are not saved in the server's disk copy. Keep a separate encrypted backup too.
+**📄 Option A — Open `LocalVault.html`:** Each browser has a separate vault. Clearing that browser's saved data may erase its vault. To move it to another browser, download an encrypted backup and restore it there.
+
+**🖥️ Option B — Use the local server:** The server must be running, and it is for this computer only. Browsers opened at the server address use the same vault, but they do not update each other right away. Use one browser at a time to avoid overwriting changes. The server keeps an encrypted copy of the main vault on this computer; weekly snapshots remain in each browser and are not included in that copy. Keep a separate encrypted backup file too.
 
 ---
 
