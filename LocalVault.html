@@ -1015,6 +1015,7 @@ $('bulkBin').onclick=()=>{
     if(!confirm(`Permanently delete ${selSet.size} selected logins? This cannot be undone.`))return;
     VAULT.entries=VAULT.entries.filter(e=>!selSet.has(e.id));
   }else{
+    if(!confirm(`Move ${selSet.size} selected logins to Bin?`))return;
     VAULT.entries.forEach(e=>{if(selSet.has(e.id)){e.trashed=true;e.trashedAt=Date.now();e.updatedAt=Date.now();}});
   }
   if(selectedId&&selSet.has(selectedId))selectedId=null;
@@ -1094,7 +1095,7 @@ function renderList(){
     const copyLbl=t==='card'?'Copy number':t==='identity'?'Copy email':t==='note'?'Copy note':t==='sshkey'?'Copy private key':'Copy password';
     const menu=e.trashed
       ?`<button data-m="restore"><span class="nic">${icon('restore')}</span>Restore</button><button data-m="purge" class="danger"><span class="nic">${icon('trash')}</span>Delete forever</button>`
-      :`<button data-m="view"><span class="nic">${icon('eye')}</span>View details</button><button data-m="secret"><span class="nic">${icon('copy')}</span>${copyLbl}</button>${t==='login'?`<button data-m="user"><span class="nic">${icon('copy')}</span>Copy username</button>`:''}<button data-m="bin" class="danger"><span class="nic">${icon('trash')}</span>Move to Bin</button>`;
+      :`<button data-m="view"><span class="nic">${icon('eye')}</span>View details</button><button data-m="secret"><span class="nic">${icon('copy')}</span>${copyLbl}</button>${t==='login'?`<button data-m="user"><span class="nic">${icon('copy')}</span>Copy username</button>`:''}<button data-m="dup"><span class="nic">${icon('copy')}</span>Duplicate</button><button data-m="bin" class="danger"><span class="nic">${icon('trash')}</span>Move to Bin</button>`;
     d.innerHTML=`<input type="checkbox" ${selSet.has(e.id)?'checked':''} title="Select" /><div class="avatar" style="background:${faviconColor(e.name)}">${esc((e.name||'?')[0])}</div><div class="etxt"><div class="nm">${esc(e.name||'(no name)')}${e.favorite?' <span class="fav">★</span>':''}${((e.type||'login')==='login'&&e.password)?`<span class="sdot" style="background:${strengthColor(scorePass(e.password))}" title="Password strength ${scorePass(e.password)}%"></span>`:''}</div><div class="un">${esc(entrySub(e))} · ${ETYPES[t]}</div></div><div class="eacts"><button class="eicon" data-copy title="${copyLbl}">${icon('copy')}</button><button class="eicon" data-menu title="Options">⋮</button><button class="eicon danger" data-del title="${e.trashed?'Delete forever':'Move to Bin'}">${icon('trash')}</button></div><div class="rowmenu hidden">${menu}</div>`;
     d.onclick=()=>{selectedId=e.id;renderList();renderDetail();};
     d.querySelector('input[type=checkbox]').onclick=ev=>{ev.stopPropagation();selSet.has(e.id)?selSet.delete(e.id):selSet.add(e.id);renderList();};
@@ -1110,12 +1111,21 @@ function renderList(){
   $('selAll').checked=visible.length>0&&visible.every(id=>selSet.has(id));
   updateBulk();
 }
+function duplicateEntry(e){
+  const copy=JSON.parse(JSON.stringify(e));
+  copy.id=uid();copy.name=(e.name||'(no name)')+' copy';
+  copy.trashed=false;copy.trashedAt=0;copy.history=[];
+  copy.createdAt=Date.now();copy.updatedAt=Date.now();
+  VAULT.entries.push(copy);selectedId=copy.id;
+  persist().then(renderAll);openEntryModal(copy);toast('Duplicated — edit and save');
+}
 function rowAction(e,act){
   document.querySelectorAll('.rowmenu').forEach(m=>m.classList.add('hidden'));
   if(act==='view'){selectedId=e.id;renderList();renderDetail();}
+  else if(act==='dup')duplicateEntry(e);
   else if(act==='user')copyText(e.username||'');
   else if(act==='secret')copyText(entrySecret(e));
-  else if(act==='bin'){e.trashed=true;e.trashedAt=Date.now();e.updatedAt=Date.now();if(selectedId===e.id)selectedId=null;persist().then(renderAll);toast('Moved to Bin');}
+  else if(act==='bin'){if(!confirm(`Move "${e.name||'(no name)'}" to Bin?`))return;e.trashed=true;e.trashedAt=Date.now();e.updatedAt=Date.now();if(selectedId===e.id)selectedId=null;persist().then(renderAll);toast('Moved to Bin');}
   else if(act==='restore'){e.trashed=false;persist().then(renderAll);}
   else if(act==='purge'){if(confirm('Permanently delete this login?')){VAULT.entries=VAULT.entries.filter(x=>x.id!==e.id);if(selectedId===e.id)selectedId=null;persist().then(renderAll);}}
 }
@@ -1181,7 +1191,7 @@ function renderDetail(){
   ${e.trashed?`<p class="hint">In Bin since ${new Date(e.trashedAt||e.updatedAt||Date.now()).toLocaleDateString()} — permanently deleted automatically after 30 days.</p>`:''}
   <div class="bw-foot">
     ${e.trashed?`<button class="bw-edit" id="dRestore">Restore</button><button class="bw-trash" id="dPurge" title="Delete forever">${icon('trash')}</button>`
-    :`<button class="bw-edit" id="dEdit">Edit</button><button class="bw-trash" id="dTrash" title="Move to bin">${icon('trash')}</button>`}
+    :`<button class="bw-edit" id="dEdit">Edit</button><button class="bw-edit" id="dDup">Duplicate</button><button class="bw-trash" id="dTrash" title="Move to bin">${icon('trash')}</button>`}
   </div>`;
   let shown=false, hideH=null;
   const needAuth=e.reprompt===true;
@@ -1221,8 +1231,9 @@ function renderDetail(){
   box.querySelectorAll('.bw-val').forEach(v=>{if(v.textContent.trim()&&!/^•+$/.test(v.textContent.trim()))v.title=v.textContent;});
   box.querySelectorAll('[data-c]').forEach(b=>b.onclick=gate(()=>copyText(b.dataset.c)));
   if($('dEdit'))$('dEdit').onclick=()=>openEntryModal(e);
+  if($('dDup'))$('dDup').onclick=()=>duplicateEntry(e);
   $('dClose').onclick=()=>{selectedId=null;renderList();renderDetail();};
-  if($('dTrash'))$('dTrash').onclick=()=>{e.trashed=true;e.trashedAt=Date.now();e.updatedAt=Date.now();persist().then(renderAll);toast('Moved to Bin');};
+  if($('dTrash'))$('dTrash').onclick=()=>{if(!confirm(`Move "${e.name||'(no name)'}" to Bin?`))return;e.trashed=true;e.trashedAt=Date.now();e.updatedAt=Date.now();persist().then(renderAll);toast('Moved to Bin');};
   if($('dRestore'))$('dRestore').onclick=()=>{e.trashed=false;persist().then(renderAll);};
   if($('dPurge'))$('dPurge').onclick=()=>{if(confirm('Permanently delete?')){VAULT.entries=VAULT.entries.filter(x=>x.id!==e.id);selectedId=null;persist().then(renderAll);}};
   if(e.totp)startTotp(e.totp);
