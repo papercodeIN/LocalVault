@@ -38,6 +38,8 @@ void handleApiPinSetup();
 void handleApiVaultGet();
 void handleApiVaultPut();
 void handleApiVaultDelete();
+void handleApiBackupExport();
+void handleApiBackupImport();
 void handleNotFound();
 void sendCorsHeaders();
 bool parseJsonBody(JsonDocument& doc);
@@ -128,6 +130,8 @@ void httpServerInit() {
   server.on("/api/vault", HTTP_GET, handleApiVaultGet);
   server.on("/api/vault", HTTP_PUT, handleApiVaultPut);
   server.on("/api/vault", HTTP_DELETE, handleApiVaultDelete);
+  server.on("/api/backup/export", HTTP_GET, handleApiBackupExport);
+  server.on("/api/backup/import", HTTP_POST, handleApiBackupImport);
   server.onNotFound(handleNotFound);
   server.begin();
   Serial.printf("[HTTP] Server started on port %d\n", HTTP_PORT);
@@ -167,12 +171,74 @@ void handleHealth() {
   doc["hostname"] = wifiHostname() + ".local";
   doc["connected"] = wifiIsConnected();
   doc["uptime"] = millis();
-#if defined(ESP8266) || defined(ESP32)
-  doc["freeHeap"] = ESP.getFreeHeap();
+  
+  // Memory and capacity info
+  int freeHeap = 0;
+  int totalHeap = 0;
+#if defined(ESP8266)
+  freeHeap = ESP.getFreeHeap();
+  totalHeap = 81920; // ESP8266 has ~80KB RAM
+#elif defined(ESP32)
+  freeHeap = ESP.getFreeHeap();
+  totalHeap = 327680; // ESP32 has ~320KB RAM
 #elif defined(PICO_W)
-  doc["freeHeap"] = rp2040.getFreeHeap();
+  freeHeap = rp2040.getFreeHeap();
+  totalHeap = 262144; // Pico W has 256KB RAM
 #endif
-  doc["vaultExists"] = vaultStoreExists();
+  doc["freeHeap"] = freeHeap;
+  doc["totalHeap"] = totalHeap;
+  doc["usedHeap"] = totalHeap - freeHeap;
+  doc["heapUsagePercent"] = (int)((float)(totalHeap - freeHeap) / totalHeap * 100);
+  
+  // Vault capacity info
+  String vaultMode = configGet(CFG_KEY_VAULT_MODE, "device");
+  doc["vaultMode"] = vaultMode;
+  
+  bool vaultExists = false;
+  int vaultSize = 0;
+  
+  if (vaultMode == "device") {
+    vaultExists = plainVaultExists();
+    if (vaultExists) {
+      File f;
+      if (plainVaultOpenRead(f)) {
+        vaultSize = f.size();
+        f.close();
+      }
+    }
+  } else {
+    vaultExists = vaultStoreExists();
+    if (vaultExists) {
+      JsonDocument vaultDoc;
+      if (vaultStoreGet(vaultDoc)) {
+        String blob = vaultDoc["blob"] | "";
+        vaultSize = blob.length();
+      }
+    }
+  }
+  
+  doc["vaultExists"] = vaultExists;
+  
+  // Calculate max vault size based on board
+  int maxVaultSize = 0;
+#if defined(ESP8266)
+  maxVaultSize = 24576; // 24KB safe limit for ESP8266
+#elif defined(ESP32)
+  maxVaultSize = 98304; // 96KB safe limit for ESP32
+#elif defined(PICO_W)
+  maxVaultSize = 98304; // 96KB safe limit for Pico W
+#endif
+  
+  doc["vaultSize"] = vaultSize;
+  doc["maxVaultSize"] = maxVaultSize;
+  doc["vaultUsagePercent"] = maxVaultSize > 0 ? (int)((float)vaultSize / maxVaultSize * 100) : 0;
+  
+  // Estimated item capacity (rough estimate: ~600 bytes per password item)
+  int estimatedItems = vaultSize > 0 ? vaultSize / 600 : 0;
+  int maxEstimatedItems = maxVaultSize / 600;
+  doc["estimatedItems"] = estimatedItems;
+  doc["maxEstimatedItems"] = maxEstimatedItems;
+  
   String out;
   serializeJson(doc, out);
   server.send(200, "application/json", out);
@@ -443,6 +509,139 @@ void handleApiRestart() {
 #elif defined(PICO_W)
   rp2040.restart();
 #endif
+}
+
+void handleApiBackupExport() {
+  sendCorsHeaders();
+  String vaultMode = configGet(CFG_KEY_VAULT_MODE, "device");
+  
+  if (vaultMode == "device") {
+    // Device vault mode - requires auth
+    if (!requireAuth()) { sendAuthRequired(); return; }
+    
+    // Export device vault
+    JsonDocument doc;
+    doc["type"] = "espvault-backup";
+    doc["version"] = "1.0";
+    doc["mode"] = "device";
+    doc["exportedAt"] = millis();
+    doc["device"] = configGet(CFG_KEY_DEVICE_NAME, "localvault");
+    
+    // Read vault file directly
+    File f;
+    if (plainVaultOpenRead(f)) {
+      JsonDocument vaultDoc;
+      DeserializationError err = deserializeJson(vaultDoc, f);
+      f.close();
+      
+      if (!err) {
+        doc["vault"] = vaultDoc["vault"];
+        doc["meta"] = vaultDoc["meta"];
+      }
+    }
+    
+    String out;
+    serializeJson(doc, out);
+    
+    server.sendHeader("Content-Disposition", "attachment; filename=espvault-backup.json");
+    server.send(200, "application/json", out);
+    Serial.println("[HTTP] Device vault backup exported");
+    
+  } else {
+    // Encrypted vault mode - export encrypted blob
+    JsonDocument doc;
+    doc["type"] = "espvault-backup";
+    doc["version"] = "1.0";
+    doc["mode"] = "encrypted";
+    doc["exportedAt"] = millis();
+    doc["device"] = configGet(CFG_KEY_DEVICE_NAME, "localvault");
+    
+    // Read vault store
+    JsonDocument vaultDoc;
+    if (vaultStoreGet(vaultDoc)) {
+      doc["blob"] = vaultDoc["blob"];
+      doc["meta"] = vaultDoc["meta"];
+      doc["rec"] = vaultDoc["rec"];
+    }
+    
+    String out;
+    serializeJson(doc, out);
+    
+    server.sendHeader("Content-Disposition", "attachment; filename=espvault-backup-encrypted.json");
+    server.send(200, "application/json", out);
+    Serial.println("[HTTP] Encrypted vault backup exported");
+  }
+}
+
+void handleApiBackupImport() {
+  sendCorsHeaders();
+  
+  JsonDocument doc;
+  if (!parseJsonBody(doc)) {
+    server.send(400, "application/json", "{\"error\":\"Invalid JSON\"}");
+    return;
+  }
+  
+  // Validate backup format
+  if (!doc["type"].is<const char*>() || String(doc["type"].as<const char*>()) != "espvault-backup") {
+    server.send(400, "application/json", "{\"error\":\"Invalid backup format\"}");
+    return;
+  }
+  
+  String backupMode = doc["mode"] | "unknown";
+  String currentMode = configGet(CFG_KEY_VAULT_MODE, "device");
+  
+  if (backupMode == "device" && currentMode == "device") {
+    // Device vault mode - requires auth
+    if (!requireAuth()) { sendAuthRequired(); return; }
+    
+    // Import device vault
+    JsonDocument importDoc;
+    importDoc["vault"] = doc["vault"];
+    importDoc["meta"] = doc["meta"];
+    
+    String importStr;
+    serializeJson(importDoc, importStr);
+    
+    if (plainVaultWrite(importStr)) {
+      JsonDocument resp;
+      resp["ok"] = true;
+      resp["message"] = "Device vault restored successfully";
+      String out;
+      serializeJson(resp, out);
+      server.send(200, "application/json", out);
+      Serial.println("[HTTP] Device vault backup imported");
+    } else {
+      server.send(500, "application/json", "{\"error\":\"Failed to write vault\"}");
+    }
+    
+  } else if (backupMode == "encrypted" && currentMode == "encrypted") {
+    // Encrypted vault mode - import encrypted blob
+    JsonDocument importDoc;
+    importDoc["blob"] = doc["blob"];
+    importDoc["meta"] = doc["meta"];
+    importDoc["rec"] = doc["rec"];
+    
+    if (vaultStorePut(importDoc)) {
+      JsonDocument resp;
+      resp["ok"] = true;
+      resp["message"] = "Encrypted vault restored successfully";
+      String out;
+      serializeJson(resp, out);
+      server.send(200, "application/json", out);
+      Serial.println("[HTTP] Encrypted vault backup imported");
+    } else {
+      server.send(500, "application/json", "{\"error\":\"Failed to write vault\"}");
+    }
+    
+  } else {
+    JsonDocument resp;
+    resp["error"] = "Vault mode mismatch";
+    resp["message"] = "Backup mode (" + backupMode + ") doesn't match current mode (" + currentMode + ")";
+    String out;
+    serializeJson(resp, out);
+    server.send(400, "application/json", out);
+  }
 }
 
 void handleNotFound() { sendCorsHeaders(); server.send(404, "text/plain", "Not found"); }

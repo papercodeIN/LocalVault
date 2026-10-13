@@ -184,6 +184,67 @@ esp-vault/
 | `/api/vault` | GET | Device mode: `{vault, meta}` plaintext (requires session) |
 | `/api/vault` | PUT | Device mode: save `{vault, meta}` plaintext |
 | `/api/vault` | DELETE | Device mode: erase vault |
+| `/api/backup/export` | GET | **NEW:** Export vault backup (device mode: requires auth, encrypted mode: public) |
+| `/api/backup/import` | POST | **NEW:** Restore vault from backup file (validates mode compatibility) |
+
+### 🆕 Backup & Restore (Added: 13-Oct-2026)
+
+**Critical feature for data safety** — ESPVault now supports vault backup and restore via API endpoints.
+
+**Why backups are critical:**
+- ⚠️ **Device failure = permanent data loss** without backups
+- Hardware has finite lifespan (flash wear, power surge, physical damage)
+- Export backups regularly (weekly recommended)
+
+**Export backup:**
+```bash
+# Device mode (requires PIN/session)
+curl http://192.168.1.100/api/backup/export \
+  -H "Cookie: lv_sess=YOUR_SESSION" \
+  -o espvault-backup.json
+
+# Encrypted mode (no auth required - already encrypted)
+curl http://192.168.1.100/api/backup/export \
+  -o espvault-backup-encrypted.json
+```
+
+**Import/restore backup:**
+```bash
+curl -X POST http://192.168.1.100/api/backup/import \
+  -H "Content-Type: application/json" \
+  -H "Cookie: lv_sess=YOUR_SESSION" \  # Device mode only
+  -d @espvault-backup.json
+```
+
+**Backup format:**
+- Includes vault type marker (`type: "espvault-backup"`)
+- Mode validation (prevents device→encrypted or encrypted→device imports)
+- Timestamp and device name metadata
+- Device mode: plaintext passwords (⚠️ store securely - use encrypted archive)
+- Encrypted mode: encrypted blob (safe to store anywhere)
+
+**Storage capacity monitoring:**
+
+`/health` endpoint now includes capacity metrics:
+
+```json
+{
+  "vaultSize": 12345,
+  "maxVaultSize": 98304,
+  "vaultUsagePercent": 12,
+  "estimatedItems": 20,
+  "maxEstimatedItems": 163,
+  "freeHeap": 285000,
+  "totalHeap": 327680,
+  "heapUsagePercent": 13
+}
+```
+
+**Capacity limits by board:**
+- **ESP8266 (D1 Mini):** 24 KB vault limit (~40-80 password items)
+- **ESP32/ESP32-C3:** 96 KB vault limit (~300+ password items)
+
+⚠️ **Export backup when usage exceeds 80%** to prevent data loss from storage exhaustion.
 
 ---
 
@@ -212,12 +273,33 @@ This ensures the device is **always accessible** even if your home WiFi goes dow
 
 ## ⚠️ Limitations (honest)
 
-- **Capacity** — RAM limits the vault file size: ~40–80 items on D1 Mini (24 KB limit), or ~300+ items on ESP32/ESP32-C3 (96 KB limit).
-- **Plain HTTP** — vault works because we inject a WebCrypto polyfill, but traffic is visible on LAN. For sensitive use, put device on a trusted network or add TLS (mkcert + cert upload).
+- **Capacity** — RAM limits the vault file size: ~40–80 items on D1 Mini (24 KB limit), or ~300+ items on ESP32/ESP32-C3 (96 KB limit). Monitor capacity via `/health` endpoint.
+- **Plain HTTP** — vault works because we inject a WebCrypto polyfill, but traffic is visible on LAN. Device mode exposes passwords over HTTP (use trusted networks only). Encrypted mode is safe over HTTP (only encrypted data transmitted).
 - **No RTC** — `savedAt` in `/api/store` uses `millis()` (uptime), not wall time.
-- **Single-user** — no auth on device API; anyone on LAN can read/write vault ciphertext.
+- **Single-user** — device mode uses PIN + sessions; encrypted mode has no device-side auth (encrypted blob is public).
 - **ESP8266 RAM** — tight (80 KB); disable debug, use `-Os` if needed.
 - **Browser Web Serial** — requires Chrome/Edge/Firefox on desktop/Android; **no Safari/iOS**.
+
+---
+
+## 🔒 Security
+
+**Read the comprehensive security documentation:** [docs/SECURITY.md](docs/SECURITY.md)
+
+Key topics covered:
+- **Threat model** — what ESPVault protects against (and what it doesn't)
+- **Vault mode comparison** — device vs encrypted mode security tradeoffs
+- **HTTP vs HTTPS** — why HTTP is acceptable for encrypted mode
+- **Backup strategy** — critical for preventing data loss from device failure
+- **Capacity monitoring** — prevent storage exhaustion
+- **Incident response** — what to do if device is lost/stolen
+
+**TL;DR Security Best Practices:**
+- ✅ **Export backups weekly** — device failure is inevitable
+- ✅ **Use encrypted mode for sensitive data** — crypto wallets, financial accounts
+- ✅ **Device mode = trusted networks only** — HTTP exposes passwords
+- ✅ **Monitor capacity** — export when >80% full
+- ✅ **Store backups securely** — device mode backups are plaintext (use encrypted archive)
 
 ---
 
