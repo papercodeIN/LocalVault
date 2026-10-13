@@ -64,20 +64,20 @@ static const char HTML_WIFI_SETUP[] =
 ".msg{margin-top:1rem;padding:.75rem;border-radius:10px;font-size:.9rem;display:none}"
 ".msg.ok{background:#ecfdf5;color:#065f46;display:block}"
 ".msg.er{background:#fef2f2;color:#991b1b;display:block}"
-".mode{display:flex;flex-direction:column;gap:.5rem}"
-".mode label{display:flex;gap:.6rem;align-items:flex-start;padding:.65rem .75rem;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:.82rem;color:#475569;line-height:1.45}"
-".mode label:has(input:checked){border-color:#4f46e5;background:#eef2ff;color:#3730a3}"
-".mode input{margin-top:.2rem;accent-color:#4f46e5}"
-".mode b{color:#0f172a}.mode label:has(input:checked) b{color:#3730a3}"
+".mode{display:flex;flex-direction:column;gap:.6rem;text-align:left}"
+".mode label{display:block;padding:.8rem .9rem;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:.82rem;color:#475569;line-height:1.45;text-align:left;transition:border-color .15s,background .15s,box-shadow .15s} .mode label span{text-align:left;display:block}"
+".mode label:has(input:checked){border-color:#4f46e5;background:#eef2ff;color:#3730a3;box-shadow:0 0 0 2px rgba(79,70,229,.12)}"
+".mode input{display:none}"
+".mode b{color:#0f172a;display:block;margin-bottom:.2rem}.mode label:has(input:checked) b{color:#3730a3}"
 "</style></head><body><div class='c'>"
 "<h1>🔐 LocalVault</h1><p class='s'>Connect your ESP to your home WiFi. After it restarts you can open it at <b>http://localvault.local</b> or at the IP shown below.</p>"
-"<div class='i' style='border:1px solid #f59e0b;background:#fffbeb;color:#92400e'>⚠️ <b>Important:</b> this page uses plain HTTP on your LAN, so browsers block real WebCrypto (<i>AES-GCM</i>). This build ships a compatible fallback — vaults created here <b>only open on this ESP-served page</b> (not on localvault.app or file://). Keep LAN trusted.</div>"
+"<div class='i' style='border:1px solid #f59e0b;background:#fffbeb;color:#92400e;margin-bottom:1.25rem'>⚠️ <b>Note:</b> This page is not encrypted (HTTP) — use a trusted WiFi. After setup your vault will be available from any device on the same WiFi.</div>"
 "<form id='wf'>"
 "<div class='f'><label>Vault mode</label><div class='mode'>"
 "<label><input type='radio' name='vm' value='device' checked><span><b>Device vault (recommended)</b> — data stored on this ESP, protected by a short device PIN. Open it from any browser on your network: PIN once per browser, then it remembers you.</span></label>"
 "<label><input type='radio' name='vm' value='zk'><span><b>Encrypted vault</b> — ESP stores only ciphertext. Master password required in every new browser (zero-knowledge).</span></label>"
 "</div></div>"
-"<div class='f'><label>WiFi network (SSID)</label><input id='ssid' name='ssid' placeholder='e.g. Capgemini_4G' required autocomplete='off'></div>"
+"<div class='f'><label>WiFi network (SSID)</label><input id='ssid' name='ssid' placeholder='Your WiFi name' required autocomplete='off'></div>"
 "<div class='f'><label>Password</label><input id='pass' name='pass' type='password' placeholder='WiFi password'></div>"
 "<button class='btn' id='btn' type='submit'>Connect to WiFi</button></form>"
 "<div id='msg' class='msg'></div>"
@@ -90,7 +90,16 @@ static const char HTML_WIFI_SETUP[] =
 "const d=new URLSearchParams(new FormData(f)).toString();"
 "const r=await fetch('/api/wifi/connect',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:d});"
 "const j=await r.json();"
-"if(j.ok){m.className='msg ok';m.textContent='✓ Saved. ESP is restarting and joining your WiFi. Reconnect your device to your home WiFi, then open http://localvault.local or http://'+location.hostname+' (new IP). This page will stop responding.';b.textContent='Done';}else{m.className='msg er';m.textContent='✗ '+(j.error||'Failed');b.disabled=false;b.textContent='Connect to WiFi';}"
+"if(j.ok){"
+"const ip=j.ip||'';"
+"const host=j.hostname||'localvault.local';"
+"const adr=ip?('  \\u2192  http://'+ip):'';"
+"const adr2='  \\u00B7  http://'+host;"
+"m.className='msg ok';"
+"m.innerHTML='\\u2713 Connected to <b>'+(j.ssid||'WiFi')+'</b>.'+(ip?(' Vault at <a href=\"http://'+ip+'\" target=\"_blank\" rel=\"noreferrer\">http://'+ip+'</a>'):'.')+'<br><span style=\"font-size:.85em;color:#0f172a\">If that link doesn\\u0027t open after you rejoin your home WiFi, try <a href=\"http://'+host+'\" target=\"_blank\" rel=\"noreferrer\">http://'+host+'</a>.'"
+"+'</span><br><br><span style=\"display:inline-block;background:#fff;border:1px solid #a5b4fc;border-radius:999px;padding:.35em .75em;font-family:ui-monospace,monospace\">'+(ip?('http://'+ip+'  \\u00B7  http://'+host):('http://'+host))+'</span>';"
+"b.textContent='Done - join your WiFi and open the link above';b.disabled=true;"
+"}else{m.className='msg er';m.textContent='\\u2717 '+(j.error||'Failed');b.disabled=false;b.textContent='Connect to WiFi';}"
 "}catch(err){m.className='msg er';m.textContent='✗ Network error: '+err.message;b.disabled=false;b.textContent='Connect to WiFi';}"
 "});</script></body></html>";
 
@@ -154,6 +163,9 @@ void handleHealth() {
   doc["device"] = configGet(CFG_KEY_DEVICE_NAME);
   doc["mode"] = (int)wifiGetMode();
   doc["ip"] = wifiGetIP();
+  doc["ssid"] = wifiGetSSID();
+  doc["hostname"] = wifiHostname() + ".local";
+  doc["connected"] = wifiIsConnected();
   doc["uptime"] = millis();
 #if defined(ESP8266) || defined(ESP32)
   doc["freeHeap"] = ESP.getFreeHeap();
@@ -328,7 +340,7 @@ void handleApiConfigGet() {
   sendCorsHeaders();
   JsonDocument doc;
   doc["deviceName"] = configGet(CFG_KEY_DEVICE_NAME);
-  doc["wifiSsid"] = configGet(CFG_KEY_WIFI_SSID);
+  doc["wifiSsid"] = wifiGetSSID();
   doc["useStatic"] = configGetBool(CFG_KEY_USE_STATIC);
   doc["staticIp"] = configGet(CFG_KEY_STATIC_IP);
   doc["staticGateway"] = configGet(CFG_KEY_STATIC_GATEWAY);
@@ -337,6 +349,8 @@ void handleApiConfigGet() {
   doc["apPass"] = configGet(CFG_KEY_AP_PASS);
   doc["mode"] = (int)wifiGetMode();
   doc["ip"] = wifiGetIP();
+  doc["ssid"] = wifiGetSSID();
+  doc["hostname"] = wifiHostname() + ".local";
   doc["connected"] = wifiIsConnected();
   doc["vaultMode"] = configGet(CFG_KEY_VAULT_MODE, "device");
   doc["pinSet"] = authPinSet();
@@ -392,18 +406,26 @@ void handleApiWifiConnect() {
   }
   if (ssid.length() == 0) { ssid = server.arg("ssid"); pass = server.arg("pass"); }
   if (ssid.length() == 0) { server.send(400, "application/json", "{\"ok\":false,\"error\":\"ssid required\"}"); return; }
+  Serial.printf("[HTTP] Trying WiFi '%s'...\n", ssid.c_str());
+  if (!wifiTryConnect(ssid, pass)) {
+    server.send(200, "application/json",
+                "{\"ok\":false,\"error\":\"Could not connect. Check the WiFi name and password, then try again.\"}");
+    return;
+  }
+  // Connected: persist credentials only after a verified success
   configSet(CFG_KEY_WIFI_SSID, ssid.c_str());
   configSet(CFG_KEY_WIFI_PASS, pass.c_str());
   configSave();
-  Serial.printf("[HTTP] WiFi credentials saved for '%s', restarting to connect\n", ssid.c_str());
-  JsonDocument resp; resp["ok"] = true; resp["message"] = "Saved. Device restarting...";
-  String out; serializeJson(resp, out); server.send(200, "application/json", out);
-  delay(800);
-#if defined(ESP8266) || defined(ESP32)
-  ESP.restart();
-#elif defined(PICO_W)
-  rp2040.restart();
-#endif
+  JsonDocument resp;
+  resp["ok"] = true;
+  resp["ip"] = WiFi.localIP().toString();
+  resp["ssid"] = wifiGetSSID();
+  resp["hostname"] = wifiHostname() + ".local";
+  String out; serializeJson(resp, out);
+  server.send(200, "application/json", out);
+  Serial.printf("[HTTP] WiFi OK: %s\n", out.c_str());
+  // Give the browser time to read the reply; wifiLoop() then drops the setup AP.
+  delay(1500);
 }
 
 void handleApiWifiForget() {

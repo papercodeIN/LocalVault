@@ -64,6 +64,11 @@ button,input,select,textarea{font:inherit}
 /* SVG icon buttons */
 .eicon svg,.iconbtn svg{display:block;width:18px;height:18px}
 .eicon{display:inline-flex;align-items:center;justify-content:center}
+/* Larger touch targets on mobile */
+@media(max-width:900px){
+  .eicon{padding:10px;font-size:18px}
+  .eicon svg{width:22px;height:22px}
+}
 .nic{display:inline-flex;flex-shrink:0}
 .nic svg{width:18px;height:18px;display:block}
 .bw-avatar svg{width:16px;height:16px}
@@ -259,6 +264,10 @@ section.detail{position:fixed;top:0;right:0;bottom:0;width:430px;max-width:94vw;
 .modal .gen-out{background:#f4f6fa;border-color:#c9d3e0;color:#17233b}
 .modal .strength{background:#e2e8f0}
 #healthModal .modal{max-width:940px}
+/* Mobile fix: prevent health modal from overflowing viewport */
+@media(max-width:900px){
+  #healthModal .modal{max-height:92vh;overflow-y:auto}
+}
 .hl-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;margin-top:4px}
 .hl-grid .rep-sec{margin-top:0}
 #healthBody{display:contents}
@@ -405,6 +414,8 @@ body.dark .hl-sub{color:#94a3b8}
 body.dark .backup-banner{background:#422006;border-color:#92400e;color:#fde68a}
 body.dark .bw-mini.ghost{color:#e2e8f0;border-color:#475569}
 body.dark .switch .sw{background:#475569}
+body.dark #logoutBtn{color:#e2e8f0}
+body.dark #logoutBtn:hover{color:#fca5a5;background:#7f1d1d}
 #menuBtn{display:none}
 @media(max-width:900px){
   #menuBtn{display:inline-flex}
@@ -1084,7 +1095,7 @@ function renderList(){
     const menu=e.trashed
       ?`<button data-m="restore"><span class="nic">${icon('restore')}</span>Restore</button><button data-m="purge" class="danger"><span class="nic">${icon('trash')}</span>Delete forever</button>`
       :`<button data-m="view"><span class="nic">${icon('eye')}</span>View details</button><button data-m="secret"><span class="nic">${icon('copy')}</span>${copyLbl}</button>${t==='login'?`<button data-m="user"><span class="nic">${icon('copy')}</span>Copy username</button>`:''}<button data-m="bin" class="danger"><span class="nic">${icon('trash')}</span>Move to Bin</button>`;
-    d.innerHTML=`<input type="checkbox" ${selSet.has(e.id)?'checked':''} title="Select" /><div class="avatar" style="background:${faviconColor(e.name)}">${esc((e.name||'?')[0])}</div><div class="etxt"><div class="nm">${esc(e.name||'(no name)')}${e.favorite?' <span class="fav">★</span>':''}${((e.type||'login')==='login'&&e.password)?`<span class="sdot" style="background:${strengthColor(scorePass(e.password))}" title="Password strength ${scorePass(e.password)}%"></span>`:''}</div><div class="un">${esc(entrySub(e))} · ${ETYPES[t]}</div></div><span class="owner-pill">Me</span><div class="eacts"><button class="eicon" data-copy title="${copyLbl}">${icon('copy')}</button><button class="eicon" data-menu title="Options">⋮</button><button class="eicon danger" data-del title="${e.trashed?'Delete forever':'Move to Bin'}">${icon('trash')}</button></div><div class="rowmenu hidden">${menu}</div>`;
+    d.innerHTML=`<input type="checkbox" ${selSet.has(e.id)?'checked':''} title="Select" /><div class="avatar" style="background:${faviconColor(e.name)}">${esc((e.name||'?')[0])}</div><div class="etxt"><div class="nm">${esc(e.name||'(no name)')}${e.favorite?' <span class="fav">★</span>':''}${((e.type||'login')==='login'&&e.password)?`<span class="sdot" style="background:${strengthColor(scorePass(e.password))}" title="Password strength ${scorePass(e.password)}%"></span>`:''}</div><div class="un">${esc(entrySub(e))} · ${ETYPES[t]}</div></div><div class="eacts"><button class="eicon" data-copy title="${copyLbl}">${icon('copy')}</button><button class="eicon" data-menu title="Options">⋮</button><button class="eicon danger" data-del title="${e.trashed?'Delete forever':'Move to Bin'}">${icon('trash')}</button></div><div class="rowmenu hidden">${menu}</div>`;
     d.onclick=()=>{selectedId=e.id;renderList();renderDetail();};
     d.querySelector('input[type=checkbox]').onclick=ev=>{ev.stopPropagation();selSet.has(e.id)?selSet.delete(e.id):selSet.add(e.id);renderList();};
     d.querySelector('[data-copy]').onclick=ev=>{ev.stopPropagation();copyText(entrySecret(e));};

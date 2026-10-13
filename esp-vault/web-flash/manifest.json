@@ -1,11 +1,19 @@
 {
-  "name": "LocalVault ESP",
-  "version": "1.0.0",
-  "home_assistant_domain": "localvault",
+  "name": "ESPVault",
+  "version": "1.0.0-13-Oct-2026",
+  "home_assistant_domain": "espvault",
   "funding_url": "https://github.com/sponsors/papercodeIN",
   "new_install_prompt_erase": true,
   "new_install_improv_wait_time": 15,
   "builds": [
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        { "path": "bootloader_esp32.bin", "offset": 4096 },
+        { "path": "partitions_esp32.bin", "offset": 32768 },
+        { "path": "firmware_esp32.bin", "offset": 65536 }
+      ]
+    },
     {
       "chipFamily": "ESP32-C3",
       "parts": [
@@ -16,12 +24,6 @@
       "chipFamily": "ESP8266",
       "parts": [
         { "path": "firmware_d1_mini.bin", "offset": 0 }
-      ]
-    },
-    {
-      "chipFamily": "RP2040",
-      "parts": [
-        { "path": "firmware_pico_w.uf2", "offset": 0 }
       ]
     }
   ]

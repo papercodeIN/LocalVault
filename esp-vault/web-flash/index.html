@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LocalVault ESP - Browser Firmware Installer</title>
+  <title>ESPVault - Browser Firmware Installer</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -42,15 +42,16 @@
 </head>
 <body>
   <div class="container">
-    <h1>🔐 LocalVault ESP</h1>
-    <p class="subtitle">Install firmware on your ESP32-C3, ESP8266 (D1 Mini), or Raspberry Pi Pico W directly from this page.</p>
+    <h1>🔐 ESPVault</h1>
+    <p class="subtitle">Install firmware on your ESP32, ESP32-C3, ESP8266 (D1 Mini), or Raspberry Pi Pico W directly from this page.</p>
     
     <div class="board-selector">
       <label for="board-select">Select your board:</label>
       <select id="board-select">
-        <option value="esp32c3">ESP32-C3 (XIAO ESP32C3, ESP32-C3-DevKitM-1, etc.)</option>
-        <option value="d1_mini">ESP8266 - Wemos D1 Mini / NodeMCU</option>
+        <option value="esp32c3">ESP32-C3</option>
+        <option value="d1_mini">Wemos D1 Mini (ESP8266)</option>
         <option value="pico_w">Raspberry Pi Pico W</option>
+        <option value="esp32">Normal ESP32</option>
       </select>
     </div>
     
@@ -97,18 +98,55 @@
 
   <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
   
+  <style>
+    #pico-instructions.instructions { margin-top: 1.5rem; padding: 1.5rem; background: #e3f2fd; border: 2px solid #4a6fa5; border-radius: 10px; }
+    #pico-instructions h3 { color: #1a1a2e; margin-bottom: 0.5rem; }
+    #pico-instructions ol { padding-left: 1.5rem; line-height: 1.9; color: #333; }
+    #pico-instructions ol strong { color: #1a1a2e; }
+    #pico-instructions .download-link { display: inline-block; margin-top: 1rem; padding: 0.7rem 1.2rem; background: #4a6fa5; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; }
+    #pico-instructions .download-link:hover { background: #3d5d8a; }
+  </style>
+  
   <script>
     const statusEl = document.getElementById('status');
     const boardSelect = document.getElementById('board-select');
     const installBtn = document.querySelector('esp-web-install-button');
-    
-    // Update manifest based on board selection
-    boardSelect.addEventListener('change', () => {
+
+    // Create/pico instructions element
+    const picoInstructions = document.createElement('div');
+    picoInstructions.id = 'pico-instructions';
+    picoInstructions.style.display = 'none';
+    picoInstructions.innerHTML = `
+      <div class="instructions">
+        <h3>📦 Raspberry Pi Pico W — Drag &amp; Drop Install</h3>
+        <p style="color:#555;margin-bottom:0.8rem">Pico W cannot be flashed via Web Serial. Use mass-storage mode instead:</p>
+        <ol>
+          <li>Disconnect Pico W from USB.</li>
+          <li>Hold the <strong>BOOTSEL</strong> button, plug USB back in, then release BOOTSEL.</li>
+          <li>A drive named <strong>RPI-RP2</strong> appears on your computer.</li>
+          <li>Drag <code>firmware_pico_w_13-Oct-2026.uf2</code> onto the RPI-RP2 drive (or click Download below).</li>
+          <li>The drive disappears and Pico W reboots with ESPVault firmware.</li>
+          <li>After reboot, connect to WiFi <strong>LocalVault-XXXXXX</strong> → open <strong>http://192.168.4.1</strong>.</li>
+        </ol>
+        <a class="download-link" href="firmware_pico_w_13-Oct-2026.uf2" download>⬇ Download firmware_pico_w_13-Oct-2026.uf2</a>
+      </div>`;
+
+    // Insert after the install button
+    installBtn.parentNode.insertBefore(picoInstructions, document.getElementById('status'));
+
+
+    function updateBoardUI() {
       const board = boardSelect.value;
-      installBtn.manifest = `manifest.json`;
+      const isPico = board === 'pico_w';
+      installBtn.style.display = isPico ? 'none' : '';
+      picoInstructions.style.display = isPico ? 'block' : 'none';
       statusEl.className = 'status';
       statusEl.textContent = '';
-    });
+    }
+
+    boardSelect.addEventListener('change', updateBoardUI);
+    // initial state
+    updateBoardUI();
     
     installBtn.addEventListener('install-start', () => {
       statusEl.className = 'status info';

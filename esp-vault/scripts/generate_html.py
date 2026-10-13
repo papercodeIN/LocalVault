@@ -314,6 +314,27 @@ def inject_device_shim(html_bytes):
     html = html[:idx] + shim + '\n' + launcher + html[idx + len('boot();'):]
     return html.encode('utf-8')
 
+def rebrand_espvault(html_bytes):
+    """Replace LocalVault branding with ESPVault for ESP firmware."""
+    html = html_bytes.decode('utf-8')
+    # Title and headings
+    html = html.replace('<title>LocalVault — Offline Password Manager</title>', 
+                        '<title>ESPVault — Offline Password Manager</title>')
+    html = html.replace('<b>local</b>vault', '<b>ESP</b>Vault')
+    html = html.replace('<b>LocalVault</b>', '<b>ESPVault</b>')
+    html = html.replace('Log in to LocalVault', 'Log in to ESPVault')
+    html = html.replace('Create your LocalVault', 'Create your ESPVault')
+    # Lock screen text
+    html = html.replace('Your vault is encrypted and stored only in this browser.', 
+                        'Your vault is encrypted and stored on this ESP device.')
+    html = html.replace('Vault is stored only in this browser — nothing ever leaves this device.',
+                        'Vault is stored on your ESP device — accessible from any browser on your network.')
+    # Recovery and storage messages
+    html = html.replace('LocalVault recovery key', 'ESPVault recovery key')
+    html = html.replace('Stored only in this browser (localStorage)', 
+                        'Stored on ESP device')
+    return html.encode('utf-8')
+
 def gzip_compress(data):
     return gzip.compress(data, 9)
 
@@ -344,7 +365,8 @@ def main():
     print(f'Original: {len(html)} bytes')
     html = inject_polyfill(html)
     html = inject_device_shim(html)
-    print(f'After polyfill injection: {len(html)} bytes')
+    html = rebrand_espvault(html)
+    print(f'After polyfill + branding: {len(html)} bytes')
     gz = gzip_compress(html)
     print(f'Gzipped: {len(gz)} bytes ({len(gz)/len(html)*100:.1f}%)')
     write_header(gz, OUTPUT_PATH)

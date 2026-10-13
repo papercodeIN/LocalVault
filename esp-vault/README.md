@@ -1,21 +1,29 @@
-# 🔐 LocalVault ESP — Offline Password Manager on Microcontrollers
+# 🔐 ESPVault — Offline Password Manager on Microcontrollers
 
-Run LocalVault entirely on an **ESP32-C3**, **ESP8266 (Wemos D1 Mini)**, or **Raspberry Pi Pico W**.  
+Run ESPVault entirely on an **ESP32**, **ESP32-C3**, or **ESP8266 (Wemos D1 Mini)**.  
 No server, no cloud — the device *is* the vault. Plug it in, connect to WiFi, open the IP in any browser.
 
 ## ✨ What you get
 
 | Feature | Details |
 |---------|---------|
-| 🌐 **Self-hosted on device** | ESP serves the full LocalVault HTML (gzipped, ~42 KB) |
+| 🌐 **Self-hosted on device** | ESP serves the full ESPVault HTML (gzipped, ~44 KB) |
 | 🔒 **Same encryption** | AES-256-GCM, PBKDF2-SHA-256 — keys never leave the browser |
 | 📶 **WiFi setup portal** | First boot → AP mode → connect → enter home WiFi → done |
-| 📌 **Static IP support** | Set a fixed IP via web UI |
+| 📌 **mDNS discovery** | Access via `http://localvault.local` (ESP32/ESP8266 only) |
 | 🔄 **Auto-reconnect** | Falls back to AP if WiFi drops, reconnects when back |
-| 💾 **Encrypted vault on flash** | Mirrors `/api/store` API — same format as Node server |
-| 🔑 **PIN-protected device vault** | Optional mode: 4–8 digit PIN once per browser (session cookie), plaintext vault on flash, rate-limited (5 tries → 60 s lockout) |
+| 💾 **Two vault modes** | **Device vault** (PIN + plaintext) or **Encrypted vault** (master password + zero-knowledge) |
+| 🔑 **Device vault mode** | 4–8 digit PIN once per browser (session cookie), plaintext storage, rate-limited (5 tries → 60 s lockout) |
+| 🔐 **Encrypted vault mode** | Full master password (12+ chars), encrypted blob storage, zero-knowledge — same as browser LocalVault |
 | 🌈 **WebCrypto polyfill** | Works over plain HTTP (no HTTPS needed on LAN) |
 | 🖥️ **Three build methods** | PlatformIO, Arduino IDE, or **one-click browser flash** |
+
+**Production Status (13-Oct-2026):**
+- ✅ **ESP32** — Tested and working (broadcasts AP, serves web interface at 192.168.4.1)
+- ✅ **ESP8266 (D1 Mini)** — Built and ready (previously tested working)
+- ⚠️ **ESP32-C3** — Built successfully, hardware testing pending
+
+**Critical Fix Applied:** Boot loop bug fixed by swapping initialization order in `src/main.cpp:75-76` — `wifiInit()` must run before `httpServerInit()` to prevent TCP/IP stack assertion failures.
 
 ---
 
@@ -25,7 +33,7 @@ No server, no cloud — the device *is* the vault. Plug it in, connect to WiFi, 
 
 1. Open the hosted installer: **[https://your-domain.com/esp-vault/web-flash/](https://your-domain.com/esp-vault/web-flash/)**  
    (or serve locally: `python -m http.server 8000 --directory esp-vault/web-flash` then `https://localhost:8000` via `mkcert`)
-2. Select your board: **ESP32-C3**, **D1 Mini**, or **Pico W**
+2. Select your board: **ESP32**, **ESP32-C3**, or **D1 Mini (ESP8266)**
 3. Click **Connect Device & Install** → pick your device in the browser dialog
 4. Wait for flash → device restarts → creates AP **LocalVault-XXXXXX**
 5. Connect to that AP → open **http://192.168.4.1**
@@ -50,12 +58,12 @@ cd esp-vault
 pio run
 
 # Build & upload specific board
+pio run -e esp32 -t upload
 pio run -e esp32c3 -t upload
 pio run -e d1_mini -t upload
-pio run -e pico_w -t upload
 
 # Monitor serial
-pio device monitor -e esp32c3
+pio device monitor -e esp32
 ```
 
 **Requirements:** Python 3.8+, PlatformIO Core (`pip install platformio`)  
@@ -68,9 +76,9 @@ pio device monitor -e esp32c3
 ### Option 2: Arduino IDE
 
 1. Install board support:
+   - **ESP32**: `https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json` → Boards Manager → `esp32` → Tools → Board → **ESP32 Dev Module** → Partition Scheme: **Default 4MB with spiffs (1.5MB SPIFFS)**
    - **ESP32-C3**: `https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json` → Boards Manager → `esp32` → Tools → Board → **ESP32C3 Dev Module** → Partition Scheme: **Default 4MB with spiffs (1.5MB SPIFFS)**
    - **ESP8266 D1 Mini**: `https://arduino.esp8266.com/stable/package_esp8266com_index.json` → Boards Manager → `esp8266` → Tools → Board → **LOLIN(WEMOS) D1 R2 & mini** → Flash Size: **4MB (FS:1MB)**
-   - **Pico W**: `https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json` → Boards Manager → `Raspberry Pi Pico/RP2040` → Tools → Board → **Raspberry Pi Pico W** → Flash Size: **2 MB (1 MB FS)**
 2. Install library: **ArduinoJson** (v7+)
 3. Open `arduino-ide/LocalVault_ESP/LocalVault_ESP.ino`
 4. Select board/port → **Upload**
@@ -93,12 +101,34 @@ python -m http.server 8443 --directory web-flash --bind 0.0.0.0
 The `web-flash/` folder contains:
 - `index.html` — ESP Web Tools install button
 - `manifest.json` — points to the three firmware files
-- `firmware_esp32c3.bin`, `firmware_d1_mini.bin`, `firmware_pico_w.uf2`
+- `firmware_esp32.bin`, `firmware_esp32c3.bin`, `firmware_d1_mini.bin`
+- `bootloader_esp32.bin`, `partitions_esp32.bin` (for ESP32 multi-part flash)
+
+### 🔧 ESP32 Bootloader Explained
+
+**Why does ESP32 need 3 files while ESP32-C3/ESP8266 need only 1?**
+
+The original ESP32 uses a **3-stage boot process**:
+
+| Offset | File | Purpose |
+|--------|------|---------|
+| `0x1000` | `bootloader_esp32.bin` | Second-stage bootloader (initializes hardware, reads partition table) |
+| `0x8000` | `partitions_esp32.bin` | Partition table (tells bootloader where app firmware is located) |
+| `0x10000` | `firmware_esp32.bin` | Your actual ESPVault application |
+
+**ESP32-C3 and ESP8266** use simpler boot architectures with everything bundled into one file at offset `0x0`.
+
+**Flash requirements by board:**
+- **ESP32**: ✅ 3 files required (bootloader + partitions + firmware)
+- **ESP32-C3**: ✅ 1 file only (firmware)
+- **ESP8266/D1 Mini**: ✅ 1 file only (firmware)
+
+The ESP Web Tools in `index.html` automatically handles multi-part flashing based on `manifest.json`. PlatformIO generates the bootloader and partition table automatically during build.
 
 **To rebuild firmware after changes:**
 ```bash
 cd esp-vault
-pio run -e esp32c3 -e d1_mini -e pico_w
+pio run -e esp32 -e esp32c3 -e d1_mini
 python scripts/copy_firmware.py
 ```
 
@@ -171,11 +201,10 @@ esp-vault/
 
 ## ⚠️ Limitations (honest)
 
-- **Capacity** — RAM limits the vault file size: ~40–80 items on D1 Mini (24 KB limit), or ~300+ items on ESP32/Pico W (96 KB limit).
+- **Capacity** — RAM limits the vault file size: ~40–80 items on D1 Mini (24 KB limit), or ~300+ items on ESP32/ESP32-C3 (96 KB limit).
 - **Plain HTTP** — vault works because we inject a WebCrypto polyfill, but traffic is visible on LAN. For sensitive use, put device on a trusted network or add TLS (mkcert + cert upload).
 - **No RTC** — `savedAt` in `/api/store` uses `millis()` (uptime), not wall time.
 - **Single-user** — no auth on device API; anyone on LAN can read/write vault ciphertext.
-- **Pico W flash** — 2 MB flash limits sketch to ~1 MB; 1 MB LittleFS for vault.
 - **ESP8266 RAM** — tight (80 KB); disable debug, use `-Os` if needed.
 - **Browser Web Serial** — requires Chrome/Edge/Firefox on desktop/Android; **no Safari/iOS**.
 

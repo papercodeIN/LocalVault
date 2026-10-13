@@ -31,7 +31,8 @@ void setup() {
 #elif defined(PICO_W)
   Serial.printf("Chip: RP2040\n");
   Serial.printf("Flash: %d MB\n", 2);  // Pico W has 2MB flash
-  Serial.printf("Free Heap: %d\n", rp2040.getFreeHeap());
+  // Free heap method may not exist on Pico W framework
+  Serial.printf("Board: Pico W\n");
 #endif
   
   // Mount LittleFS
@@ -72,8 +73,8 @@ void setup() {
   // Initialize subsystems
   vaultStoreInit();
   authInit();
+  wifiInit();  // This also loads config and applies defaults - MUST be before HTTP
   httpServerInit();
-  wifiInit();  // This also loads config and applies defaults
   
   // LED setup
   pinMode(LED_PIN, OUTPUT);
