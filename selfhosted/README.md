@@ -8,6 +8,10 @@ Zero dependencies — just **Node 18+**. The server only serves the file and sto
 
 ## 🏁 Start in 3 steps
 
+On Windows, double-click `start-windows.bat` to start the server, then open **http://127.0.0.1:18765** in each browser you want to use. To stop it, run `stop-windows.bat`. Keep the server running while using LocalVault.
+
+On macOS or Linux (or from a terminal):
+
 ```sh
 cd selfhosted
 node server.js
@@ -79,7 +83,7 @@ Server-only notes — the basics (no reset email, no auto-lock, backups are on y
 
 - **Works only while running.** No program, no page. Run `node setup.js` once to auto-start on login.
 - **No login on it.** Keep it on this PC only, never open it to the network.
-- **One browser at a time.** All browsers share one vault, but the last save wins and open tabs don't refresh.
+- **Browsers share the same server vault, not live synchronization.** Open the server URL (`http://127.0.0.1:18765`) in each browser on the same computer. They load and save the same encrypted disk store, but use one browser at a time: the last save wins, and already-open tabs do not refresh. The server must be running.
 - **Snapshots stay in the browser.** The vault is saved to disk, the weekly snapshots are not.
 
 ---
