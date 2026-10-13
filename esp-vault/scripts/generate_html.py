@@ -451,14 +451,6 @@ btn.onclick = submit;
       const el = document.getElementById(id);
       if (el) el.style.display = 'none';
     });
-    // 3. Point users at the live backup path
-    const setH = modal.querySelector('.set-h');
-    if (setH) {
-      const hint = document.createElement('p');
-      hint.className = 'hint';
-      hint.textContent = 'Backup via Export menu → Device Backup (JSON). Restore via Import.';
-      setH.insertAdjacentElement('afterend', hint);
-    }
   };
   window.deviceGate = async () => {
     const result = await deviceBoot();
