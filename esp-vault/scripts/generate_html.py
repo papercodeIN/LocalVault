@@ -291,7 +291,7 @@ btn.onclick = submit;
     // Fetch health info for capacity
     let healthData = null;
     try {
-      const r = await fetch('/api/health', { cache: 'no-store' });
+      const r = await fetch('/health', { cache: 'no-store' });
       if (r.ok) healthData = await r.json();
     } catch (e) {}
     
