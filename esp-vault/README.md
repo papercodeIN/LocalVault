@@ -189,11 +189,22 @@ esp-vault/
 
 ## 💡 How it works
 
-1. **First boot** — no WiFi saved → starts AP `LocalVault-XXXXXX` (open)
+### WiFi Connection & Auto-Fallback
+
+1. **First boot** — no WiFi saved → starts AP `LocalVault-XXXXXX` (open) at 192.168.4.1
 2. **User connects** → browser opens `http://192.168.4.1` → setup UI
 3. **User enters home WiFi** → device saves to `/config.json` → restarts
 4. **STA mode** — connects to home WiFi, serves vault on that IP
-5. **If WiFi lost** → auto-reconnect every 30s; after timeout → falls back to AP
+5. **WiFi resilience:**
+   - **Connection lost** → auto-reconnect every 30 seconds
+   - **After 10 failed attempts (5 minutes)** → automatically starts AP mode (AP+STA)
+   - **User can reconnect to AP** → reconfigure WiFi via `http://192.168.4.1`
+   - **Once new WiFi connects** → AP shuts down automatically, back to STA mode
+
+This ensures the device is **always accessible** even if your home WiFi goes down or credentials change.
+
+### Vault Modes
+
 6. **Zero-knowledge vault** — encrypted blob in LittleFS `/vault.enc.json`, mirrors browser `localStorage`. Keys never leave the browser.
 7. **Device vault** — PIN lives in config, session tokens in `/tokens.json` (max 12, oldest evicted), vault plaintext in `/vault.plain.json`. A slim JS shim injected into the served page bypasses the master-password screens and syncs straight to `/api/vault`.
 

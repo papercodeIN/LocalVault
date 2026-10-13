@@ -26,6 +26,8 @@
 static LvWiFiMode currentMode = LV_WIFI_MODE_STA;
 static unsigned long lastReconnectAttempt = 0;
 static bool apStarted = false;
+static int failedReconnectCount = 0;
+static const int MAX_RECONNECT_ATTEMPTS = 10; // 10 attempts * 30s = 5 minutes
 
 String wifiHostname() {
   String h = configGet(CFG_KEY_DEVICE_NAME, "localvault");
@@ -152,6 +154,7 @@ void wifiInit() {
   if (WiFi.status() == WL_CONNECTED) {
     Serial.printf("[WiFi] Connected! IP: %s\n", WiFi.localIP().toString().c_str());
     currentMode = LV_WIFI_MODE_STA;
+    failedReconnectCount = 0; // Reset counter on successful connection
     wifiStopAP();
     wifiStartMDNS();
   } else {
@@ -167,9 +170,26 @@ void wifiLoop() {
   // Periodic reconnection attempt in STA mode
   if (currentMode == LV_WIFI_MODE_STA && WiFi.status() != WL_CONNECTED) {
     if (millis() - lastReconnectAttempt > WIFI_RECONNECT_INTERVAL_MS) {
-      Serial.println("[WiFi] Connection lost, attempting reconnect...");
+      Serial.printf("[WiFi] Connection lost, attempting reconnect (%d/%d)...\n", 
+                    failedReconnectCount + 1, MAX_RECONNECT_ATTEMPTS);
       wifiReconnect();
       lastReconnectAttempt = millis();
+      
+      // If still not connected, increment counter
+      if (WiFi.status() != WL_CONNECTED) {
+        failedReconnectCount++;
+        
+        // After MAX_RECONNECT_ATTEMPTS, fall back to AP mode
+        if (failedReconnectCount >= MAX_RECONNECT_ATTEMPTS) {
+          Serial.printf("[WiFi] Failed to reconnect after %d attempts, starting AP mode\n", 
+                        MAX_RECONNECT_ATTEMPTS);
+          wifiStartAP();
+          failedReconnectCount = 0; // Reset counter
+        }
+      } else {
+        // Successfully reconnected, reset counter
+        failedReconnectCount = 0;
+      }
     }
   }
   
@@ -178,6 +198,7 @@ void wifiLoop() {
     Serial.println("[WiFi] STA connected, stopping AP");
     wifiStopAP();
     currentMode = LV_WIFI_MODE_STA;
+    failedReconnectCount = 0; // Reset counter on successful connection
   }
 }
 
