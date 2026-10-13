@@ -37,7 +37,8 @@ To start the server automatically when you sign in, run `node setup.js` from the
 | 🎲 Generator | Passwords + passphrases, offline |
 | 💓 Health report | Weak / reused / old passwords, optional breach check |
 | 📁 Folders, ⭐ favourites, 🔍 instant search | Bitwarden-style sidebar |
-| 🗑️ Bin with 30-day auto-expire | Recoverable deletes, bulk actions |
+| 🗑️ Bin with 30-day auto-expire | Recoverable deletes, bulk actions, and confirmation before moving entries to Bin |
+| 📋 Duplicate entries | Duplicate from the entry menu or detail view, then edit the copy |
 | 📥 Import / 📤 Export | CSV, JSON, Excel + encrypted backups, duplicate detection |
 | 🔑 Recovery key | Forgotten master password? Reset it, keep your data |
 | 🛡️ Re-prompt | Per-item "ask master password before showing" |
@@ -114,4 +115,5 @@ Logins, cards, identities, notes, SSH keys, folders, TOTP, generator, health, im
 
 - `LocalVault.html` — the entire app. Double-click to run.
 - `selfhosted/` — loopback server + encrypted disk store + one-script setup ([guide](selfhosted/README.md)).
-- `README.md` — you are here. 🙂
+- `README.md` — browser and self-hosted features, usage, and limitations.
+- `esp-vault/README.md` — ESPVault features, verified bug fixes, device limitations, and build/flash guidance.

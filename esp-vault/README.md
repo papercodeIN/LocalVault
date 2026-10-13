@@ -17,11 +17,15 @@ No server, no cloud — the device *is* the vault. Plug it in, connect to WiFi, 
 | 🔐 **Encrypted vault mode** | Full master password (12+ chars), encrypted blob storage, zero-knowledge — same as browser LocalVault |
 | 🌈 **WebCrypto polyfill** | Works over plain HTTP (no HTTPS needed on LAN) |
 | 🖥️ **Three build methods** | PlatformIO, Arduino IDE, or **one-click browser flash** |
+| 🗂️ **Vault management** | Search, folders, favourites, Bin, duplicate entries, and confirmation before moving entries to Bin |
+| 📦 **Device backups** | Export/restore full Device Backup JSON; restore replaces the device vault. CSV remains available for row-based import/export |
 
 **Production Status (13-Oct-2026):**
 - ✅ **ESP32** — Tested and working (broadcasts AP, serves web interface at 192.168.4.1)
-- ✅ **ESP8266 (D1 Mini)** — Built and ready (previously tested working)
+- ✅ **ESP8266 (D1 Mini)** — Tested on hardware; Device Backup API restore exercised
 - ⚠️ **ESP32-C3** — Built successfully, hardware testing pending
+
+Recent fixes: importing a Device Backup (`espvault-backup` JSON) through the embedded UI now routes it to the device restore API instead of treating its nested `vault.entries` as a generic import. Generic CSV/JSON imports continue to use the preview-and-merge flow. See [Known Bugs and Limitations](#known-bugs-and-limitations).
 
 **Critical Fix Applied:** Boot loop bug fixed by swapping initialization order in `src/main.cpp:75-76` — `wifiInit()` must run before `httpServerInit()` to prevent TCP/IP stack assertion failures.
 
@@ -241,10 +245,10 @@ curl -X POST http://192.168.1.100/api/backup/import \
 ```
 
 **Capacity limits by board:**
-- **ESP8266 (D1 Mini):** 24 KB vault limit (~40-80 password items)
-- **ESP32/ESP32-C3:** 96 KB vault limit (~300+ password items)
+- **ESP8266 (D1 Mini):** advertised 24 KB vault limit. Actual reliable save capacity depends on free contiguous RAM and vault contents; hardware tests observed a 28-entry, 14.6 KB vault saving successfully while a 29th entry failed in a whole-vault PUT. The item count is not a guarantee.
+- **ESP32/ESP32-C3:** advertised 96 KB vault limit (~300+ password items); actual capacity depends on item size and available RAM.
 
-⚠️ **Export backup when usage exceeds 80%** to prevent data loss from storage exhaustion.
+⚠️ **Export backup when usage exceeds 80%** to reduce risk of data loss from storage exhaustion. Keep a copy before firmware updates or device resets.
 
 ---
 
@@ -271,14 +275,22 @@ This ensures the device is **always accessible** even if your home WiFi goes dow
 
 ---
 
-## ⚠️ Limitations (honest)
+## Known Bugs and Limitations
 
-- **Capacity** — RAM limits the vault file size: ~40–80 items on D1 Mini (24 KB limit), or ~300+ items on ESP32/ESP32-C3 (96 KB limit). Monitor capacity via `/health` endpoint.
-- **Plain HTTP** — vault works because we inject a WebCrypto polyfill, but traffic is visible on LAN. Device mode exposes passwords over HTTP (use trusted networks only). Encrypted mode is safe over HTTP (only encrypted data transmitted).
-- **No RTC** — `savedAt` in `/api/store` uses `millis()` (uptime), not wall time.
-- **Single-user** — device mode uses PIN + sessions; encrypted mode has no device-side auth (encrypted blob is public).
-- **ESP8266 RAM** — tight (80 KB); disable debug, use `-Os` if needed.
-- **Browser Web Serial** — requires Chrome/Edge/Firefox on desktop/Android; **no Safari/iOS**.
+- **D1 Mini save ceiling:** `/api/vault` PUT buffers and parses the entire request in limited ESP8266 RAM. The nominal 24 KB limit is not a guaranteed writable request size. A hardware test saved 28 entries at about 14.6 KB; adding a 29th failed. Large entries can reduce the count. Streaming or otherwise lowering peak RAM use remains future work.
+- **Device Backup import:** Device Backup JSON uses `{ "type": "espvault-backup", "mode": "device", "vault": { "entries": [...] } }`. The embedded UI detects that format and calls `/api/backup/import`; this fix is in the latest firmware build, but devices must be reflashed to receive it. Generic CSV/JSON imports use the row preview-and-merge flow; Device Backup restore replaces the device vault.
+- **Device-mode backup is plaintext:** PIN/session authentication protects device endpoints, but exported Device Backup JSON contains plaintext vault data. Store it securely; use an encrypted container if needed.
+- **Flashing/reset data risk:** flashing or resetting/erasing LittleFS can remove the on-device vault. Download and verify a backup before maintenance. Do not assume a firmware update preserves data unless the flashing procedure preserves the filesystem.
+- **Plain HTTP on LAN:** Device mode sends plaintext vault contents to the browser over HTTP. Use only on a trusted network; a PIN does not encrypt network traffic.
+- **Estimated capacity:** `/health` reports byte use and an estimated item count. Item estimates are approximate and do not ensure a future save will fit.
+- **No RTC:** `savedAt` in `/api/store` uses `millis()` (uptime), not wall time.
+- **Single-user:** device mode uses PIN + sessions; encrypted mode has no device-side auth (encrypted blob is public).
+- **Browser Web Serial:** requires a compatible desktop/Android browser; Safari/iOS is not supported.
+- **Hardware coverage:** ESP32 and D1 Mini have been exercised on hardware; ESP32-C3 has built successfully but still needs hardware validation.
+
+### Bug-fix and feature tracking
+
+This README records user-visible ESPVault features, known limitations, and material bug fixes as they are verified. Update it whenever an ESPVault bug is fixed or a feature/limitation changes; keep the root README focused on the browser and self-hosted app.
 
 ---
 
