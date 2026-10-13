@@ -842,11 +842,15 @@ function clearSession(){try{sessionStorage.removeItem(LS_SESS);}catch{}}
 async function boot(){
   await serverPull();
   refreshLock();
+  const sessionAtStart=sessionStorage.getItem(LS_SESS);
+  if(!sessionAtStart)return;
   try{
-    const blob=loadBlob(),s=JSON.parse(sessionStorage.getItem(LS_SESS));
+    const blob=loadBlob(),s=JSON.parse(sessionAtStart);
     if(blob&&s&&s.key){
       const key=await crypto.subtle.importKey('raw',b64d(s.key),{name:'AES-GCM',length:256},true,['encrypt','decrypt']);
-      VAULT=await decryptVault(key,blob);
+      const vault=await decryptVault(key,blob);
+      if(sessionStorage.getItem(LS_SESS)!==sessionAtStart)return;
+      VAULT=vault;
       VAULT.entries=VAULT.entries||[];VAULT.folders=VAULT.folders||[];
       MASTER_KEY=key;META=loadMeta();enterApp();toast('Session restored');
     }
@@ -892,7 +896,19 @@ function showRecoveryCreated(code){
 $('recCopyBtn').onclick=async()=>{ if(_pendingRecCode){ try{await navigator.clipboard.writeText(_pendingRecCode);}catch{copyText(_pendingRecCode,0);} toast('Recovery key copied'); } };
 $('recPrintBtn').onclick=()=>{ const w=window.open('','_blank'); if(!w)return toast('Pop-up blocked'); w.document.write('<pre style="font-family:monospace;white-space:pre-wrap;word-break:break-all;padding:24px">'+esc(_pendingRecCode)+'<br><br>LocalVault recovery key — store offline. Anyone with this can reset your master password.</pre>'); w.document.close(); w.print(); };
 $('recDownloadBtn').onclick=()=>{ if(!_pendingRecCode)return; downloadBlob(new Blob([_pendingRecCode+'\n\nLocalVault recovery key — store offline. Anyone with this can reset your master password.\nCreated '+new Date().toISOString()+'\n'],{type:'text/plain'}),'LocalVault-recovery-key.txt'); toast('Downloaded'); };
-$('recCreatedOk').onclick=()=>{ $('recCreatedModal').classList.add('hidden'); _pendingRecCode=null; enterApp(); toast('Vault created — recovery key saved locally'); };
+$('recCreatedOk').onclick=async()=>{
+  if(!_pendingRecCode)return;
+  const code=_pendingRecCode;
+  $('recCreatedOk').disabled=true;
+  try{
+    await storeRecovery(code);
+    $('recCreatedModal').classList.add('hidden');
+    _pendingRecCode=null;
+    enterApp();
+    toast('Recovery key activated');
+  }catch(error){toast('Could not save recovery key: '+error.message);}
+  $('recCreatedOk').disabled=false;
+};
 $('createBtn').onclick=async()=>{
   const p1=$('newPass').value,p2=$('newPass2').value,iters=parseInt($('iterSel').value);
   const msg=$('lockMsg');msg.innerHTML='';
@@ -1124,8 +1140,9 @@ function renderDetail(){
   const digits=(card.number||'').replace(/\D/g,'');
   const cardMasked=digits.length>4?'•••• •••• •••• '+digits.slice(-4):'••••••••';
   const totpHtml=(t==='login'&&e.totp)?`<div class="bw-row"><div class="grow"><div class="bw-lab">Verification code · <span id="totpCount"></span>s</div><div class="bw-val totp-code" id="totpCode">···</div><div class="totp-bar"><i id="totpBar"></i></div></div><button class="eicon" onclick="copyTotp()" title="Copy code" aria-label="Copy code">${icon('copy')}</button></div>`:'';
+  const customFields=Array.isArray(e.custom)?e.custom:[];
   box.innerHTML=`
-  <div class="bw-viewhead"><h2>View ${ETYPES[t]}</h2><button class="bw-x" id="dClose" title="Close">${icon('x')}</button></div>
+  <div class="bw-viewhead"><h2>View ${ETYPES[t]||'Item'}</h2><button class="bw-x" id="dClose" title="Close">${icon('x')}</button></div>
   <div class="bw-card"><div class="bw-idrow"><div class="avatar" style="background:${faviconColor(e.name)};width:42px;height:42px;font-size:19px">${esc((e.name||'?')[0])}</div>
     <div style="flex:1;min-width:0"><div class="bw-idname">${esc(e.name||'(no name)')}</div><div class="bw-idfolder"><span class="nic" data-icon="folder"></span> ${esc(folderName(e.folderId))} · ${ETYPES[t]}${e.favorite?' · <span class="nic" data-icon="star"></span> Favourite':''}</div></div></div></div>
   ${t==='login'?`<div class="bw-sect">Login credentials</div>
@@ -1154,7 +1171,7 @@ function renderDetail(){
     <div class="bw-row"><div class="grow"><div class="bw-lab">Public key</div><div class="bw-val ${ssh.pub?'':'dim'}" style="white-space:pre-wrap;word-break:break-all">${esc(ssh.pub||'—')}</div></div><button class="eicon" data-sshcopy="pub" title="Copy public key">${icon('copy')}</button></div>
     <div class="bw-row"><div class="grow"><div class="bw-lab">Passphrase</div><div class="bw-val" id="sshPassMask">••••••••</div></div><button class="eicon" id="dShowSshPass" title="Show/hide">${icon('eye')}</button><button class="eicon" data-sshcopy="pass" title="Copy passphrase">${icon('copy')}</button></div>
   </div>`:''}
-  ${e.custom?.length?`<div class="bw-sect">Custom fields (${e.custom.length})</div><div class="bw-card">${e.custom.map((f,i)=>`<div class="bw-row"><div class="grow"><div class="bw-lab">${esc(f.n||'Field '+(i+1))}</div><div class="bw-val" id="cf-${i}">${f.h?'••••••••':esc(f.v||'—')}</div></div>${f.h?`<button class="eicon" data-cfshow="${i}" title="Show/hide">${icon('eye')}</button>`:''}<button class="eicon" data-cfcopy="${i}" title="Copy">${icon('copy')}</button></div>`).join('')}</div>`:''}
+  ${customFields.length?`<div class="bw-sect">Custom fields (${customFields.length})</div><div class="bw-card">${customFields.map((f,i)=>`<div class="bw-row"><div class="grow"><div class="bw-lab">${esc(typeof f?.n==='string'?f.n:'Field '+(i+1))}</div><div class="bw-val" id="cf-${i}">${f?.h===true?'••••••••':esc(typeof f?.v==='string'&&f.v?f.v:'—')}</div></div>${f?.h===true?`<button class="eicon" data-cfshow="${i}" title="Show/hide">${icon('eye')}</button>`:''}<button class="eicon" data-cfcopy="${i}" title="Copy">${icon('copy')}</button></div>`).join('')}</div>`:''}
   ${e.notes?`<div class="bw-sect">${t==='note'?'Note':'Notes'}</div><div class="bw-card"><div class="bw-notes">${esc(e.notes)}</div></div>`:''}
   ${e.history?.length?`<div class="bw-sect">Password history (${e.history.length})</div><div class="bw-card">${e.history.map((h,i)=>`<div class="bw-row"><div class="grow"><div class="bw-lab">${new Date(h.changedAt).toLocaleString()}</div><div class="bw-val" id="hist-${i}">••••••••</div></div><button class="eicon" data-hshow="${i}" title="Show/hide">${icon('eye')}</button><button class="eicon" data-hcopy="${i}" title="Copy">${icon('copy')}</button><button class="eicon" data-hrest="${i}" title="Restore this password">${icon('restore')}</button></div>`).join('')}</div>`:''}
   ${e.trashed?`<p class="hint">In Bin since ${new Date(e.trashedAt||e.updatedAt||Date.now()).toLocaleDateString()} — permanently deleted automatically after 30 days.</p>`:''}
@@ -1712,11 +1729,10 @@ $('kdfBtn').onclick=async()=>{
 $('genRecBtn').onclick=async()=>{
   if(hasRecovery() && !confirm('Regenerate recovery key? The old key will stop working — you must save the new one.')) return;
   const code=genRecoveryCode();
-  await storeRecovery(code);
-  refreshRecStatus();
-  _pendingRecCode=code; $('recDisplay').textContent=code;
+  _pendingRecCode=code;
+  $('recDisplay').textContent=code;
   $('recCreatedModal').classList.remove('hidden');
-  toast('New recovery key generated — save it now');
+  toast('Save the new recovery key, then confirm to activate it');
 };
 $('copyRecBtn').onclick=async()=>{
   if(_pendingRecCode){ try{await navigator.clipboard.writeText(_pendingRecCode);}catch{copyText(_pendingRecCode,0);} return toast('Recovery key copied'); }

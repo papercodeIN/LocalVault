@@ -31,7 +31,8 @@ function status() {
 
 function install() {
   if (OS === 'win32') {
-    const vbs = `Set WshShell = CreateObject("WScript.Shell")\r\nWshShell.Run "node \\"${SERVER}\\"", 0, False\r\n`;
+    const quoteVbs = (value) => value.replace(/"/g, '""');
+    const vbs = `Set WshShell = CreateObject("WScript.Shell")\r\nWshShell.Run """${quoteVbs(NODE)}"" ""${quoteVbs(SERVER)}""", 0, False\r\n`;
     fs.mkdirSync(path.dirname(winVbsPath()), { recursive: true });
     fs.writeFileSync(winVbsPath(), vbs);
     console.log('Installed: server starts hidden on Windows login.');
