@@ -417,11 +417,54 @@ btn.onclick = submit;
     }
   };
   
+  // ===== ESP UI simplify (device mode): pro-gate Security level, hide dead Backup rows =====
+  // Settings rows for encrypted Download/Restore + auto weekly backup need MASTER_KEY,
+  // which device mode never sets -> dead UI. Live path is Export menu -> Device Backup,
+  // Import -> Restore. Hidden (not removed) so settingsBtn handlers keep working.
+  const simplifyEspSettings = () => {
+    const modal = document.querySelector('#setModal .modal');
+    if (!modal || document.getElementById('espSimplified')) return;
+    const done = document.createElement('span');
+    done.id = 'espSimplified';
+    done.style.display = 'none';
+    modal.appendChild(done);
+    // 1. Security level (pro only) -> collapsed behind a switch, off by default
+    const kdfSel = document.getElementById('kdfSel');
+    const kdfSec = kdfSel ? kdfSel.closest('.set-sec') : null;
+    if (kdfSec) {
+      const toggle = document.createElement('div');
+      toggle.className = 'srow';
+      toggle.innerHTML = '<div class="grow"><b>Pro options</b><span class="desc">Security level (KDF iterations) — only if you know what this does</span></div><label class="switch"><input type="checkbox" id="espProTgl" /><span class="sw"></span></label>';
+      kdfSec.style.display = 'none';
+      kdfSec.parentElement.insertBefore(toggle, kdfSec);
+      toggle.querySelector('#espProTgl').onchange = (e) => {
+        kdfSec.style.display = e.target.checked ? '' : 'none';
+      };
+    }
+    // 2. Hide dead Backup rows: encrypted Download / Restore / auto-backup / last-backup line
+    ['expEnc', 'impEncBtn', 'autoTgl'].forEach((id) => {
+      const el = document.getElementById(id);
+      const row = el ? el.closest('.srow') : null;
+      if (row) row.style.display = 'none';
+    });
+    ['autoStatus', 'autoList', 'backupLine'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    // 3. Point users at the live backup path
+    const setH = modal.querySelector('.set-h');
+    if (setH) {
+      const hint = document.createElement('p');
+      hint.className = 'hint';
+      hint.textContent = 'Backup via Export menu → Device Backup (JSON). Restore via Import.';
+      setH.insertAdjacentElement('afterend', hint);
+    }
+  };
   window.deviceGate = async () => {
     const result = await deviceBoot();
     if (result) {
-      // Initialize backup/restore UI after device boot
-      setTimeout(initBackupRestore, 500);
+      // Initialize backup/restore UI + simplify Settings after device boot
+      setTimeout(() => { initBackupRestore(); simplifyEspSettings(); }, 500);
     }
     return result;
   };
