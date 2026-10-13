@@ -6,36 +6,39 @@ Zero dependencies — just **Node 18+**. The server only serves the file and sto
 
 ---
 
-## 🏁 Start in 3 steps
+## 🏁 Start here
 
-On Windows, double-click `start-windows.bat` to start the server, then open **http://127.0.0.1:18765** in each browser you want to use. To stop it, run `stop-windows.bat`. Keep the server running while using LocalVault.
+### Windows
 
-On macOS or Linux (or from a terminal):
+1. Install Node.js 18 or newer if it is not already installed.
+2. Double-click `start-windows.bat` inside `selfhosted/`. It starts the server hidden and opens LocalVault in your default browser.
+3. In other browsers on the same computer, open **http://127.0.0.1:18765**. Keep the server running; use one browser at a time.
+4. To stop it, double-click `stop-windows.bat`.
+
+### macOS / Linux
 
 ```sh
 cd selfhosted
 node server.js
 ```
 
-Open 👉 **http://127.0.0.1:18765** · Health: 👉 **http://127.0.0.1:18765/health**
+Then open **http://127.0.0.1:18765** in a browser. Health check: **http://127.0.0.1:18765/health**. Keep the terminal/server running while using LocalVault.
+
+### Optional: start automatically at login
 
 ```sh
-node setup.js            # menu: 1 = install auto-start, 2 = remove it
-node setup.js install    # non-interactive install
-node setup.js uninstall  # non-interactive remove
+node setup.js            # interactive install/uninstall menu
+node setup.js install    # install auto-start
+node setup.js uninstall  # remove auto-start
 ```
 
-| OS | Install does… |
+To change the port, set `LOCALVAULT_PORT` before starting the server (for example, `LOCALVAULT_PORT=8080 node server.js`). The host remains bound to `127.0.0.1`.
+
+| OS | Auto-start behavior |
 |---|---|
-| 🪟 Windows | Hidden launcher in your Startup folder (no admin). `start-windows.bat` runs it now, `stop-windows.bat` stops it. |
-| 🐧 Linux | `systemd` user service, enabled immediately. |
-| 🍎 macOS | LaunchAgent, loaded immediately. |
-
-Change port (host must stay loopback):
-
-```sh
-LOCALVAULT_PORT=8080 node server.js
-```
+| Windows | Hidden launcher in your Startup folder (no admin). `start-windows.bat` runs it now; `stop-windows.bat` stops it. |
+| Linux | `systemd` user service, enabled immediately. |
+| macOS | LaunchAgent, loaded immediately. |
 
 ---
 
@@ -43,17 +46,21 @@ LOCALVAULT_PORT=8080 node server.js
 
 ```text
 Open LocalVault.html directly
-  └─ Browser A → its own local vault
+  ├─ Browser A → its own local vault
   └─ Browser B → a separate local vault (no sharing)
 
-Run selfhosted/server.js, then open http://127.0.0.1:18765
-  └─ Browser A ─┐
-  └─ Browser B ─┴→ same encrypted server vault on this computer
-                    Use one browser at a time; open tabs do not live-sync.
+Start self-hosted server → open http://127.0.0.1:18765
+  ├─ Browser A ─┐
+  └─ Browser B ─┴→ one encrypted vault mirrored to this computer's disk
+                    Sequential use only; no live sync between open tabs.
 ```
 
-Direct-file mode keeps data separately in each browser. Self-hosted mode shares one vault through the running local server; each browser must use the server address, not open the HTML file directly. Move an existing file-mode vault once using the encrypted backup steps below.
+| Mode | Advantages | Trade-offs |
+|---|---|---|
+| Open `LocalVault.html` | Simplest; works offline; no Node/server to run | Each browser has a separate vault; browser data clearing can erase that browser's copy; sharing requires manual export/import. |
+| Self-hosted | Browsers on this computer use the same vault; encrypted disk mirror survives browser storage clearing; optional start-on-login | Requires Node and a running server; browsers do not live-sync, so use one at a time; server is loopback-only and not reachable from other devices by default. |
 
+For shared use, every browser must open the server address—not the HTML file. Transfer an existing file-mode vault once using the encrypted-backup steps below. The server is local storage, not cloud sync or multi-user access.
 ---
 
 ## 🔄 First run — one-time move (2 min)
@@ -86,22 +93,26 @@ Your browser treats the server address as a *new home*, so the old vault doesn't
 
 ---
 
-## 🛡️ Security rules
+## 🛡️ Important security and data notes
 
-1. **Binds `127.0.0.1` only** — unreachable from the network. Keep it that way.
-2. **Never port-forward to the internet.** LAN sharing is a conscious choice — ask first.
-3. Same recovery-key flow as file mode — save the key shown at creation.
+- The server binds to `127.0.0.1` only; it is for this computer and is not reachable from other devices by default. Do not port-forward it or expose it to the internet.
+- The server stores encrypted data and cannot read vault contents, but anyone with access to your computer can copy or delete the store. Protect the computer and keep separate backups.
+- Save the recovery key shown at vault creation. There is no password reset; changing the master password or security level invalidates the previous recovery key. See the [main README](../README.md) for other app-wide limitations.
+- `vault.store.json` is the server's persistent encrypted mirror, not a backup strategy. Keep an encrypted backup somewhere separate from this computer.
+- Weekly snapshots are stored in browser storage, not in `vault.store.json`; they do not follow you to another browser.
+- Exports such as CSV or plain JSON contain readable passwords. Store them securely and delete them when no longer needed; use encrypted backups for safekeeping.
+- When moving data from direct-file mode, export an encrypted backup first and verify the restored entries before relying on the server copy.
 
 ---
 
-## ⚠️ Honest limitations
+## ⚠️ Self-hosted limitations
 
-Server-only notes — the basics (no reset email, no auto-lock, backups are on you) are in the [main README](../README.md).
-
-- **Works only while running.** No program, no page. Run `node setup.js` once to auto-start on login.
-- **No login on it.** Keep it on this PC only, never open it to the network.
-- **Browsers share the same server vault, not live synchronization.** Open the server URL (`http://127.0.0.1:18765`) in each browser on the same computer. They load and save the same encrypted disk store, but use one browser at a time: the last save wins, and already-open tabs do not refresh. The server must be running.
-- **Snapshots stay in the browser.** The vault is saved to disk, the weekly snapshots are not.
+- The server must be running to open the app through its URL. Use the optional login auto-start if desired.
+- There is no separate server login. Anyone using the computer can access the app page; the vault still requires its master password to unlock.
+- Browsers on this computer load/save the same server vault, but there is no live synchronization. Use one browser at a time: the newest save wins, and already-open tabs do not refresh automatically.
+- The server is local-only by default. It is not cloud sync, LAN sharing, or multi-user access.
+- Browser snapshots remain in that browser and are not mirrored to the server disk.
+- App-wide limitations—including no password reset, no auto-lock, and the need to manage backups—are covered in the [main README](../README.md).
 
 ---
 
