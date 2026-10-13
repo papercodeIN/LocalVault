@@ -1,58 +1,117 @@
-# LocalVault
+# 🔐 LocalVault — Offline Password Manager
 
-An offline password manager that encrypts your vault on your device. No account, cloud sync, or subscription.
+> Your passwords. Your device. Nobody else's server.
 
-## Quick start
+No accounts. No cloud. No tracking. No fees. Just one app that keeps your secrets encrypted on hardware you own.
 
-> ## 🔴 **OPTION A — OPEN THE FILE (SIMPLEST)**
+---
 
-1. Open `LocalVault.html` in your browser.
-2. Create a vault with a strong master password.
-3. Save the recovery key somewhere safe. It is shown once and is needed to reset a forgotten password.
+## 🚀 Quick start (60 seconds)
 
-The vault is saved in that browser. Other browsers have separate vaults.
+> ## 🔴 **OPTION A — DOUBLE-CLICK & GO (SIMPLEST)**
 
-> ## 🔵 **OPTION B — USE THE LOCAL SERVER**
+1. Double-click `LocalVault.html` — opens in any browser, works fully offline.
+2. Create your vault → pick a strong master password (min 12 chars).
+3. 💾 **Save the recovery key** shown once — it's your only way back in if you forget the password.
 
-On Windows, open `selfhosted/start-windows.bat`. On macOS or Linux, run:
+> ## 🔵 **OPTION B — RUN A LOCAL SERVER**
+
+On Windows, double-click `selfhosted/start-windows.bat`. On macOS or Linux, open a terminal and run:
 
 ```sh
 cd selfhosted
 node server.js
 ```
 
-Then open `http://127.0.0.1:18765`. Browsers using this address share the vault, with an encrypted copy stored on this computer. The server must be running. Use one browser at a time; open tabs do not sync changes live.
+Then open **http://127.0.0.1:18765**. The server keeps an encrypted copy of your vault on this computer. You can open this address in different browsers on the same computer to use the same vault. Use one browser at a time; changes do not appear in other open tabs automatically.
 
-For automatic startup, run `node setup.js` from the `selfhosted` folder. To move an existing vault to the server, follow the [self-hosted guide](selfhosted/README.md).
+To start the server automatically when you sign in, run `node setup.js` from the `selfhosted` folder and follow the menu. To move an existing vault into the server, use the encrypted backup and restore steps in the [self-hosted guide](selfhosted/README.md).
 
-## Your data and backups
+---
 
-- **File option:** Vault data is stored in the browser. Clearing that browser's saved data may remove it.
-- **Server option:** The browser and the server's local disk store an encrypted copy of the vault. Weekly snapshots remain in each browser and are not included in the server's disk copy.
-- **Keep a separate backup:** In Settings, use **Download backup** to save an encrypted backup file somewhere safe. The server copy is useful for recovery, but is not a separate backup.
-- **Exports:** CSV, Excel, and plain JSON exports contain readable passwords. Keep them private and delete them when no longer needed.
+## ✨ What you get
 
-Encryption and decryption happen in the browser; the self-hosted server stores encrypted vault data. The server listens on this computer only by default. Do not expose it to the internet.
+| Feature | Details |
+|---|---|
+| 🔑 Logins, Cards, Identities, Notes, SSH keys | Bitwarden-style **+ Add** menu, per-type forms |
+| 🎲 Generator | Passwords + passphrases, offline |
+| 💓 Health report | Weak / reused / old passwords, optional breach check |
+| 📁 Folders, ⭐ favourites, 🔍 instant search | Bitwarden-style sidebar |
+| 🗑️ Bin with 30-day auto-expire | Recoverable deletes, bulk actions |
+| 📥 Import / 📤 Export | CSV, JSON, Excel + encrypted backups, duplicate detection |
+| 🔑 Recovery key | Forgotten master password? Reset it, keep your data |
+| 🛡️ Re-prompt | Per-item "ask master password before showing" |
+| 🌙 Dark mode, ⌨️ shortcuts (`Ctrl+K`, `Ctrl+N`, `Esc`) | |
+| 📅 Weekly auto-backup | Encrypted snapshots (keeps newest 4), restore any of them |
 
-## Features
+---
 
-- Logins, cards, identities, notes, and SSH keys
-- Password and passphrase generator
-- Folders, search, favourites, and recoverable bin
-- Import and export, with duplicate detection
-- Recovery key and per-item master-password re-prompt
-- Password health report and optional breach check
-- Dark mode and keyboard shortcuts (`Ctrl+K`, `Ctrl+N`, `Esc`)
-- Weekly encrypted browser snapshots (keeps the newest four)
+## 💾 Where is my data, exactly?
 
-## If you forget your password
+| How you open LocalVault | Where your vault is kept |
+|---|---|
+| Open `LocalVault.html` | Separately in each browser. Browsers do not share this vault. |
+| Use the local server | In the browser and as an encrypted copy on this computer. Browsers using the server address share this vault. |
 
-Use **Use recovery key** on the lock screen and set a new password. Changing your master password or security level invalidates the recovery key, so generate and save a new one in Settings.
+The server only saves encrypted vault data; it cannot read your passwords. The encrypted copy can restore your vault if browser data is cleared, but it is not a replacement for keeping a separate backup. Weekly snapshots stay in browser storage and are not included in the server's disk copy.
 
-Without the master password or recovery key, the vault cannot be unlocked. Restore an encrypted backup if you have one.
+---
 
-## More information
+## 🔑 Forgot your master password?
 
-- [Self-hosted setup and usage](selfhosted/README.md)
-- `LocalVault.html` — the standalone app
-- `selfhosted/` — the optional local server and setup scripts
+1. Lock screen → **Use recovery key** → paste the key you saved at creation.
+2. Set a new password. Done — entries preserved, nothing lost.
+3. No key *and* no password? The vault is unrecoverable by design — delete and start over (or restore an encrypted backup file).
+
+> ⚠️ Changing your master password or security level **invalidates the old recovery key** — generate a fresh one in Settings → Recovery key.
+
+---
+
+## ⚠️ Important things to know
+
+These apply whether you open the HTML file or use the local server:
+
+- **Keep your recovery key safe.** There is no password reset. If you forget your master password and lose the recovery key, you cannot unlock the vault. Anyone with the recovery key can unlock it.
+- **Lock the app when you finish.** It does not lock itself automatically.
+- **Make a backup you can keep elsewhere.** Weekly snapshots are saved quietly in the browser, not downloaded as files. Use **Download backup** in Settings to save an encrypted backup file, and keep a copy somewhere safe.
+- **Be careful with exports.** CSV, Excel, and plain JSON files show your passwords. Keep them private and delete them when you no longer need them.
+
+**📄 Option A — Open `LocalVault.html`:** Each browser has a separate vault. Clearing that browser's saved data may erase its vault. To move it to another browser, download an encrypted backup and restore it there.
+
+**🖥️ Option B — Use the local server:** The server must be running, and it is for this computer only. Browsers opened at the server address use the same vault, but they do not update each other right away. Use one browser at a time to avoid overwriting changes. The server keeps an encrypted copy of the main vault on this computer; weekly snapshots remain in each browser and are not included in that copy. Keep a separate encrypted backup file too.
+
+---
+
+## ❓ FAQ
+
+<details>
+<summary><b>Can I use it on my phone?</b></summary>
+
+Yes — open the file or server address in Chrome/Safari and bookmark it. Same rules: that phone browser holds its own vault copy.
+</details>
+
+<details>
+<summary><b>Can I run it on a Raspberry Pi?</b></summary>
+
+Yes — pure Node, runs great on ARM. Install Node 20+ via NodeSource (Pi OS apt is usually too old), then `node setup.js`. It serves loopback-only, so use the Pi's own browser — or ask about LAN access before exposing it further.
+</details>
+
+<details>
+<summary><b>Is it safe to put the server on my home network?</b></summary>
+
+The vault stays encrypted either way (decryption happens in your browser), but the page itself would be reachable by anyone on the network. Loopback-only by default is the safe choice — don't port-forward it to the internet.
+</details>
+
+<details>
+<summary><b>Bitwarden has X — do you?</b></summary>
+
+Logins, cards, identities, notes, SSH keys, folders, TOTP, generator, health, import/export, recovery key, re-prompt, auto-backup. No cloud sync, no browser-extension autofill, no sharing/organizations — that's the offline tradeoff.
+</details>
+
+---
+
+## 📂 Files
+
+- `LocalVault.html` — the entire app. Double-click to run.
+- `selfhosted/` — loopback server + encrypted disk store + one-script setup ([guide](selfhosted/README.md)).
+- `README.md` — you are here. 🙂
