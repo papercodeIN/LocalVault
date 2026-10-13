@@ -14,17 +14,18 @@ No accounts. No cloud. No tracking. No fees. Just one app that keeps your secret
 2. Create your vault → pick a strong master password (min 12 chars).
 3. 💾 **Save the recovery key** shown once — it's your only way back in if you forget the password.
 
-**Option B — self-hosted server (recommended for daily use)**
+**Option B — run a local server**
+
+On Windows, double-click `selfhosted/start-windows.bat`. On macOS or Linux, open a terminal and run:
 
 ```sh
 cd selfhosted
-node setup.js      # 1 = auto-start on login, 2 = remove it
-node server.js     # or double-click start-windows.bat on Windows
+node server.js
 ```
 
-Then open 👉 **http://127.0.0.1:18765**
+Then open **http://127.0.0.1:18765**. The server keeps an encrypted copy of your vault on this computer. You can open this address in different browsers on the same computer to use the same vault. Use one browser at a time; changes do not appear in other open tabs automatically.
 
-> First run needs a one-time move: export from the file version → restore into the server address (new browser origin = fresh storage). Details in [`selfhosted/README.md`](selfhosted/README.md).
+To start the server automatically when you sign in, run `node setup.js` from the `selfhosted` folder and follow the menu. To move an existing vault into the server, use the encrypted backup and restore steps in the [self-hosted guide](selfhosted/README.md).
 
 ---
 
@@ -47,12 +48,12 @@ Then open 👉 **http://127.0.0.1:18765**
 
 ## 💾 Where is my data, exactly?
 
-| Mode | Vault lives in… | Cleared by… |
-|---|---|---|
-| 📄 File (`LocalVault.html`) | That browser's `localStorage` | Clearing browser cookies/cache |
-| 🖥️ Server (`selfhosted/`) | Browser `localStorage` **+ encrypted mirror** `vault.store.json` on your disk | Browser clear only removes the copy — disk mirror reloads on next boot |
+| How you open LocalVault | Where your vault is kept |
+|---|---|
+| Open `LocalVault.html` | Separately in each browser. Browsers do not share this vault. |
+| Use the local server | In the browser and as an encrypted copy on this computer. Browsers using the server address share this vault. |
 
-Everything stored is **ciphertext** (AES-256-GCM, keys from PBKDF2-SHA-256). The server never sees plaintext — it just hands the file to your browser.
+The server only saves encrypted vault data; it cannot read your passwords. The encrypted copy can restore your vault if browser data is cleared, but it is not a replacement for keeping a separate backup. Weekly snapshots stay in browser storage and are not included in the server's disk copy.
 
 ---
 
@@ -73,9 +74,9 @@ Everything stored is **ciphertext** (AES-256-GCM, keys from PBKDF2-SHA-256). The
 - **Backups are on you.** A snapshot is saved once a week, but only when you open the app (keeps the last 4). Copy the encrypted backup to a USB stick now and then.
 - **Exports show passwords.** CSV, Excel and plain JSON are readable by anyone. Only the encrypted backup is safe to keep around.
 
-**📄 Double-click file:** one browser = one vault. Clearing that browser's data deletes everything. Move via export/import.
+**📄 Open the HTML file:** Each browser has its own vault. If you clear that browser's saved data, its vault may be lost. Use an encrypted backup to move it to another browser.
 
-**🖥️ Self-hosted:** works only while the program runs. No login on it, so keep it on this PC only. All browsers share one vault, but use one at a time — last save wins, open tabs don't refresh. Weekly snapshots stay in the browser, not on disk.
+**🖥️ Use the local server:** Keep the server running while you use it. It is for this computer only, not for sharing over the internet or with other computers. Browsers opened at the server address use the same vault, but changes do not show up in other open tabs right away; use one browser at a time. Weekly snapshots stay in browser storage and are not saved in the server's disk copy. Keep a separate encrypted backup too.
 
 ---
 
