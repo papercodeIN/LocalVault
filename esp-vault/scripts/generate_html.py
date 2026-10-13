@@ -354,7 +354,7 @@ btn.onclick = submit;
           const backupBtn = document.createElement('div');
           backupBtn.id = 'deviceBackupBtn';
           backupBtn.className = 'nav-item sub';
-          backupBtn.innerHTML = '<span class="nic" data-icon="download"></span>Device Backup (JSON)';
+          backupBtn.textContent = 'Device Backup (JSON)';
           backupBtn.onclick = async () => {
             try {
               const r = await fetch('/api/backup/export');
