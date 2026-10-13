@@ -111,7 +111,7 @@ Your browser treats the server address as a *new home*, so the old vault doesn't
 - There is no separate server login. Anyone using the computer can access the app page; the vault still requires its master password to unlock.
 - Browsers on this computer load/save the same server vault, but there is no live synchronization. Use one browser at a time: the newest save wins, and already-open tabs do not refresh automatically.
 - The server is local-only by default. It is not cloud sync, LAN sharing, or multi-user access.
-- Browser snapshots remain in that browser and are not mirrored to the server disk.
+- **Direct-file mode only:** weekly snapshots remain in that browser and are not mirrored to the server disk.
 - App-wide limitations—including no password reset, no auto-lock, and the need to manage backups—are covered in the [main README](../README.md).
 
 ---
