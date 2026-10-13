@@ -39,9 +39,9 @@ LOCALVAULT_PORT=8080 node server.js
 
 Your browser treats the server address as a *new home*, so the old vault doesn't follow automatically:
 
-1. Open `LocalVault.html` → Export JSON (or Settings → Download backup).
-2. Open `http://127.0.0.1:18765` → create vault with the **same** master password → Settings → Restore from file.
-3. ✅ Verify entries — from now on, live here. Every change is mirrored encrypted to disk.
+1. Open `LocalVault.html`, unlock your vault, then go to Settings → **Download backup**. This creates an encrypted backup file.
+2. Open `http://127.0.0.1:18765` → create a vault with the **same** master password → Settings → **Restore from file**, then select the backup. Confirm that you want to replace the new, empty vault.
+3. Verify your entries. From now on, the vault is mirrored encrypted to `vault.store.json` while the server runs.
 
 ---
 
