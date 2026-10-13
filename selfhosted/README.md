@@ -39,6 +39,23 @@ LOCALVAULT_PORT=8080 node server.js
 
 ---
 
+## 🌐 Choose how to run LocalVault
+
+```text
+Open LocalVault.html directly
+  └─ Browser A → its own local vault
+  └─ Browser B → a separate local vault (no sharing)
+
+Run selfhosted/server.js, then open http://127.0.0.1:18765
+  └─ Browser A ─┐
+  └─ Browser B ─┴→ same encrypted server vault on this computer
+                    Use one browser at a time; open tabs do not live-sync.
+```
+
+Direct-file mode keeps data separately in each browser. Self-hosted mode shares one vault through the running local server; each browser must use the server address, not open the HTML file directly. Move an existing file-mode vault once using the encrypted backup steps below.
+
+---
+
 ## 🔄 First run — one-time move (2 min)
 
 Your browser treats the server address as a *new home*, so the old vault doesn't follow automatically:
