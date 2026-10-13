@@ -196,6 +196,8 @@ void handleHealth() {
   
   bool vaultExists = false;
   int vaultSize = 0;
+  int trashedItems = 0; // entries in Bin (still occupy bytes until emptied)
+  int liveEntries = 0;  // non-trashed entries counted from raw JSON (low-RAM safe)
   
   if (vaultMode == "device") {
     vaultExists = plainVaultExists();
@@ -203,6 +205,41 @@ void handleHealth() {
       File f;
       if (plainVaultOpenRead(f)) {
         vaultSize = f.size();
+        // Count "trashed":true/false markers in 256B chunks (no full JSON parse:
+        // a 24KB vault would need ~2x RAM to deserialize on ESP8266).
+        // JSON.stringify emits no spaces; imports may use one space.
+        const char* pTrue1 = "\"trashed\":true";
+        const char* pTrue2 = "\"trashed\": true";
+        const char* pFalse1 = "\"trashed\":false";
+        const char* pFalse2 = "\"trashed\": false";
+        const size_t keep = 20; // >= longest pattern (17) - 1, for chunk boundaries
+        String tail = "";
+        uint8_t buf[256];
+        while (f.available()) {
+          size_t n = f.read(buf, sizeof(buf));
+          String chunk = tail;
+          for (size_t i = 0; i < n; i++) chunk += (char)buf[i];
+          int c = 0, idx = 0;
+          while ((idx = chunk.indexOf(pTrue1, idx)) >= 0) { c++; idx += 14; }
+          idx = 0;
+          while ((idx = chunk.indexOf(pTrue2, idx)) >= 0) { c++; idx += 15; }
+          idx = 0;
+          while ((idx = tail.indexOf(pTrue1, idx)) >= 0) { c--; idx += 14; }
+          idx = 0;
+          while ((idx = tail.indexOf(pTrue2, idx)) >= 0) { c--; idx += 15; }
+          trashedItems += c;
+          int l = 0;
+          idx = 0;
+          while ((idx = chunk.indexOf(pFalse1, idx)) >= 0) { l++; idx += 16; }
+          idx = 0;
+          while ((idx = chunk.indexOf(pFalse2, idx)) >= 0) { l++; idx += 17; }
+          idx = 0;
+          while ((idx = tail.indexOf(pFalse1, idx)) >= 0) { l--; idx += 16; }
+          idx = 0;
+          while ((idx = tail.indexOf(pFalse2, idx)) >= 0) { l--; idx += 17; }
+          liveEntries += l;
+          tail = chunk.length() > (int)keep ? chunk.substring(chunk.length() - keep) : chunk;
+        }
         f.close();
       }
     }
@@ -234,10 +271,15 @@ void handleHealth() {
   doc["vaultUsagePercent"] = maxVaultSize > 0 ? (int)((float)vaultSize / maxVaultSize * 100) : 0;
   
   // Estimated item capacity (rough estimate: ~600 bytes per password item)
-  int estimatedItems = vaultSize > 0 ? vaultSize / 600 : 0;
+  // estimatedItems counts live entries only; Bin contents reported separately
+  // (deleted logins stay in the vault file until Bin is emptied).
+  int totalEst = vaultSize > 0 ? vaultSize / 600 : 0;
+  int estimatedItems = (liveEntries > 0) ? liveEntries : (totalEst - trashedItems);
+  if (estimatedItems < 0) estimatedItems = 0;
   int maxEstimatedItems = maxVaultSize / 600;
   doc["estimatedItems"] = estimatedItems;
   doc["maxEstimatedItems"] = maxEstimatedItems;
+  doc["trashedItems"] = trashedItems;
   
   String out;
   serializeJson(doc, out);

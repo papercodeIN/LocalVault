@@ -316,6 +316,11 @@ btn.onclick = submit;
         + '<div style="margin-top:.75rem;font-size:.8rem;color:#64748b">'
         + 'Estimated: ' + (healthData.estimatedItems || 0) + ' / ' + (healthData.maxEstimatedItems || 0) + ' items'
         + '</div>'
+        + ((healthData.trashedItems || 0) > 0
+            ? '<div style="margin-top:.5rem;font-size:.8rem;color:#b45309">'
+            + 'Bin: ' + healthData.trashedItems + ' item(s) — empty Bin to free space.'
+            + '</div>'
+            : '')
         + (vaultUsage > 80 
             ? '<div style="margin-top:1rem;padding:.75rem;background:#fee;border:1px solid #fca;border-radius:8px;font-size:.85rem;color:#dc2626">'
             + '⚠️ Storage nearly full! Export backup now to prevent data loss.'
