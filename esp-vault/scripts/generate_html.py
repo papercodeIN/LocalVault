@@ -284,9 +284,10 @@ btn.onclick = submit;
   };
   // ===== P1: Backup/Restore + Capacity Monitoring =====
   const initBackupRestore = async () => {
-    // Add capacity indicator to settings
-    const settingsPanel = document.querySelector('.settings-content');
-    if (!settingsPanel) return;
+    // Add capacity indicator to settings (#setModal .modal in LocalVault.html)
+    const settingsModal = document.querySelector('#setModal .modal');
+    if (!settingsModal) return;
+    if (document.getElementById('espCapacitySection')) return;
     
     // Fetch health info for capacity
     let healthData = null;
@@ -327,10 +328,13 @@ btn.onclick = submit;
         capacitySection.style.borderColor = '#334155';
       }
       
-      // Insert after general settings
-      const generalSection = settingsPanel.querySelector('h3');
-      if (generalSection && generalSection.parentElement) {
-        generalSection.parentElement.insertAdjacentElement('afterend', capacitySection);
+      capacitySection.id = 'espCapacitySection';
+      // Insert at top of Settings, just before .set-grid
+      const setGrid = settingsModal.querySelector('.set-grid');
+      if (setGrid) {
+        setGrid.insertAdjacentElement('beforebegin', capacitySection);
+      } else {
+        settingsModal.appendChild(capacitySection);
       }
     }
     
@@ -344,7 +348,7 @@ btn.onclick = submit;
         if (expSub && !expSub.querySelector('#deviceBackupBtn')) {
           const backupBtn = document.createElement('div');
           backupBtn.id = 'deviceBackupBtn';
-          backupBtn.className = 'exp-option';
+          backupBtn.className = 'nav-item sub';
           backupBtn.innerHTML = '<span class="nic" data-icon="download"></span>Device Backup (JSON)';
           backupBtn.onclick = async () => {
             try {
@@ -373,8 +377,8 @@ btn.onclick = submit;
     if (impNav) {
       const originalImpClick = impNav.onclick;
       impNav.onclick = async (e) => {
-        // Add device restore option
-        const modal = document.querySelector('.modal');
+        // Add device restore option (#impPrevModal .modal in LocalVault.html)
+        const modal = document.querySelector('#impPrevModal .modal');
         if (modal && !modal.querySelector('#deviceRestoreBtn')) {
           const restoreBtn = document.createElement('button');
           restoreBtn.id = 'deviceRestoreBtn';
