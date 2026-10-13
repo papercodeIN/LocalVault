@@ -462,6 +462,40 @@ btn.onclick = submit;
       const el = document.getElementById(id);
       if (el) el.style.display = 'none';
     });
+    // 5. UI Import of a Device Backup file died with "no rows found"
+    //    (importer looks for top-level entries; device backups nest them
+    //    under .vault). Intercept and restore via API instead.
+    const impFile = document.getElementById('impAnyFile');
+    if (impFile && !impFile.dataset.espHooked) {
+      impFile.dataset.espHooked = '1';
+      const origOnChange = impFile.onchange;
+      impFile.onchange = async (ev) => {
+        const f = ev.target.files[0];
+        if (f) {
+          try {
+            const text = await f.text();
+            const j = JSON.parse(text);
+            if (j && j.type === 'espvault-backup' && j.mode === 'device') {
+              ev.target.value = '';
+              const r = await fetch('/api/backup/import', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: text
+              });
+              if (!r.ok) throw new Error('Restore failed (' + r.status + ')');
+              try { toast('Vault restored! Reloading...'); } catch (e2) {}
+              setTimeout(() => location.reload(), 1500);
+              return;
+            }
+          } catch (e) {
+            if (e && e.message && e.message.indexOf('Restore failed') === 0) {
+              try { toast(e.message); } catch (e2) {}
+              return;
+            }
+            // not a device backup — fall through to normal import
+          }
+        }
+        if (origOnChange) origOnChange.call(impFile, ev);
+      };
+    }
   };
   window.deviceGate = async () => {
     const result = await deviceBoot();
