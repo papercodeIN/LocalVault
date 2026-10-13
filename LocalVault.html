@@ -168,7 +168,7 @@ aside{width:264px;flex-shrink:0;background:#175ddc;color:#fff;padding:14px 12px;
 .side-foot{margin-top:auto;padding-top:14px;display:grid;gap:8px}
 .hint.light{color:rgba(255,255,255,.8);margin:0}
 aside select{background:rgba(255,255,255,.16)!important;border:1px solid transparent!important;color:#fff!important;padding:4px 6px;border-radius:6px;width:auto}
-section.list{flex:1;background:#fff;display:flex;flex-direction:column;min-height:0;min-width:0}
+section.list{width:380px;flex-shrink:0;background:#fff;display:flex;flex-direction:column;min-height:0;min-width:0;border-right:1px solid #dfe5ee}
 .vault-top{display:flex;align-items:center;gap:10px;padding:18px 18px 12px}
 .vault-top h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-.02em;color:#17233b}
 .bw-add{background:#175ddc;border:0;color:#fff;border-radius:9px;padding:8px 18px;cursor:pointer;font-weight:600;font-size:14px}
@@ -182,15 +182,13 @@ section.list{flex:1;background:#fff;display:flex;flex-direction:column;min-heigh
 .bulkbar{display:flex;align-items:center;gap:10px;margin:0 18px 8px;background:#e8effc;border:1px solid #c4d6f7;border-radius:9px;padding:7px 12px;font-size:13px;color:#17233b}
 .txtbtn{background:none;border:0;cursor:pointer;font-size:13px;color:#c81e1e;font-weight:600;padding:2px 4px}
 .txtbtn.dim{color:#5c6b82;font-weight:400}
-.col-head{display:grid;grid-template-columns:20px 32px minmax(0,1fr) 90px 76px;gap:12px;align-items:center;padding:10px 18px;font-size:13.5px;color:#5c6b82;border-bottom:1.5px solid #dfe5ee}
-.col-head input[type=checkbox]{width:16px;height:16px;accent-color:#175ddc;cursor:pointer}
+.col-head{display:flex;align-items:center;padding:10px 18px;font-size:13.5px;color:#5c6b82;border-bottom:1.5px solid #dfe5ee}
 .ch-name select{border:0;background:none;color:#5c6b82;font-size:13.5px;font-weight:500;cursor:pointer;outline:none;max-width:100%}
 .ch-name select:hover{color:#17233b}
 .ch-opts{text-align:right}
 #entryList{overflow:auto;flex:1}
-.entry{display:grid;grid-template-columns:20px 32px minmax(0,1fr) 90px 76px;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid #eef1f6;cursor:pointer;background:#fff;position:relative}
+.entry{display:grid;grid-template-columns:32px minmax(0,1fr);gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid #eef1f6;cursor:pointer;background:#fff;position:relative}
 .entry:hover{background:#f4f7fc}.entry.active{background:#e8effc}
-.entry input[type=checkbox]{width:17px;height:17px;accent-color:#175ddc;cursor:pointer}
 .owner-pill{font-size:12px;color:#175ddc;background:#e8effc;border-radius:6px;padding:3px 10px;text-align:center;white-space:nowrap;overflow:hidden}
 .entry .eacts{display:flex;gap:2px;justify-content:flex-end;justify-self:end;grid-column:4/6;white-space:nowrap;margin-left:auto}
 .rowmenu{position:absolute;right:14px;top:46px;background:#fff;border:1px solid #dfe5ee;border-radius:10px;box-shadow:0 12px 32px rgba(23,35,59,.18);z-index:30;min-width:190px;padding:5px;cursor:default}
@@ -209,7 +207,8 @@ body.dark #addMenu .add-sep{border-color:#334155}
 .rowmenu button:hover{background:#eef2f8}
 .rowmenu button.danger{color:#c81e1e}
 .rowmenu .nic svg{width:16px;height:16px}
-.avatar{width:32px;height:32px;border-radius:8px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;text-transform:uppercase;font-size:15px}
+.avatar{width:32px;height:32px;border-radius:8px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;text-transform:uppercase;font-size:15px;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:contain;border-radius:inherit;background:#fff}
 .entry .etxt{flex:1;min-width:0}
 .entry .nm{font-size:14.5px;font-weight:600;color:#175ddc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .entry.active .nm{font-weight:700}
@@ -220,7 +219,12 @@ body.dark #addMenu .add-sep{border-color:#334155}
 .eicon:hover{background:#e3e9f2}
 .eicon.danger{color:#c81e1e}
 .eicon.danger:hover{background:#fee2e2}
-section.detail{position:fixed;top:0;right:0;bottom:0;width:430px;max-width:94vw;overflow:auto;padding:20px 24px;background:#eef1f6;z-index:40;box-shadow:-14px 0 36px rgba(23,35,59,.20);animation:slideIn .18s ease-out}
+section.detail{flex:1;min-width:0;min-height:0;overflow:auto;padding:28px 32px;background:#eef1f6;display:flex;flex-direction:column}
+section.detail:not(.empty)>.bw-foot{position:sticky;bottom:-28px;margin-top:auto;padding:14px 0 0;background:#eef1f6;z-index:2}
+body.dark section.detail:not(.empty)>.bw-foot{background:#0f172a}
+.detail-empty{margin:auto;text-align:center;color:#8a97ab}
+.detail-empty .big{font-size:44px;font-weight:800;letter-spacing:-.03em;color:#c3ccd9}
+.detail-empty p{margin:8px 0 0;font-size:14px}
 .bw-viewhead{display:flex;align-items:center;justify-content:space-between;margin:2px 0 14px}
 .bw-viewhead h2{margin:0;font-size:21px;font-weight:600;color:#17233b}
 .bw-x{background:none;border:0;font-size:18px;cursor:pointer;color:#17233b;padding:6px}
@@ -237,10 +241,13 @@ section.detail{position:fixed;top:0;right:0;bottom:0;width:430px;max-width:94vw;
 .bw-val{font-size:14.5px;color:#17233b;word-break:break-all}
 .bw-val.dim{color:#8a97ab}
 .bw-notes{font-size:14px;white-space:pre-wrap;color:#17233b}
-.bw-foot{display:flex;align-items:center;gap:10px;margin-top:16px}
-.bw-edit{flex:1;background:#175ddc;border:0;color:#fff;border-radius:9px;padding:11px;cursor:pointer;font-weight:600;font-size:14.5px}
-.bw-edit:hover{background:#0b3d91}
-.bw-trash{background:none;border:0;cursor:pointer;font-size:20px;padding:8px;color:#c81e1e}
+.bw-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid #dfe5ee}
+.bw-foot-left{display:flex;align-items:center;gap:8px}
+.bw-action{display:flex;align-items:center;gap:7px;background:none;border:1px solid #c9d3e0;color:#175ddc;border-radius:7px;padding:8px 12px;cursor:pointer;font-size:13px;font-weight:600}
+.bw-action:hover{background:#e8effc;border-color:#175ddc}
+.bw-action svg{width:17px;height:17px}
+.bw-action.danger{color:#c81e1e}
+.bw-action.danger:hover{background:#fff1f1;border-color:#c81e1e}
 .hbtn{background:#fff;border:1px solid #c9d3e0;color:#17233b;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13.5px;white-space:nowrap}
 .hbtn:hover{border-color:#175ddc}
 .hbtn.primary{background:#175ddc;border-color:#175ddc;color:#fff;font-weight:600}
@@ -347,7 +354,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .prev-table th{color:var(--muted);font-weight:600;text-transform:uppercase;font-size:11px}
 .skip{color:var(--muted)}
 @keyframes slideIn{from{transform:translateX(40px);opacity:.4}to{transform:none;opacity:1}}
-@media(max-width:900px){aside{display:none}section.detail{width:100vw;max-width:100vw}}
+@media(max-width:900px){aside{display:none}section.list{width:auto;flex:1;border-right:0}section.detail{position:fixed;top:0;right:0;bottom:0;width:100vw;max-width:100vw;z-index:40;box-shadow:-14px 0 36px rgba(23,35,59,.20)}section.detail.empty{position:static;box-shadow:none;width:auto;flex:1}}
 /* ---- item 12: dark mode (body.dark). Lock screen always stays light ---- */
 body.dark{background:#0f172a}
 body.dark #appView{background:#0f172a;color:#e2e8f0}
@@ -364,6 +371,11 @@ body.dark .entry .nm{color:#7db4ff}
 body.dark .entry .un{color:#94a3b8}
 body.dark .owner-pill{background:#1e3a5f;color:#9ec5ff}
 body.dark .bulkbar{background:#1e3a5f;border-color:#2b4a73;color:#e2e8f0}
+body.dark .bw-foot{border-color:#24304d}
+body.dark .bw-action{border-color:#334155;color:#9ec5ff}
+body.dark .bw-action:hover{background:#1e3a5f;border-color:#60a5fa}
+body.dark .bw-action.danger{color:#f87171}
+body.dark .bw-action.danger:hover{background:#3b2028;border-color:#f87171}
 body.dark .txtbtn.dim{color:#94a3b8}
 body.dark .rowmenu{background:#1b2947;border-color:#334155}
 body.dark .rowmenu button{color:#e2e8f0}
@@ -485,9 +497,6 @@ body.dark #logoutBtn:hover{color:#fca5a5;background:#7f1d1d}
       <div class="nav-item" id="expNav"><span class="nic" data-icon="download"></span> Export</div>
       <div id="expSub" class="hidden">
         <div class="nav-item sub" id="expSubJson">JSON file</div>
-        <div class="nav-item sub" id="expSubCopy">Copy JSON</div>
-        <div class="nav-item sub" id="expSubCsv">CSV file</div>
-        <div class="nav-item sub" id="expSubXls">Excel file</div>
       </div>
       <div class="side-foot">
         <div class="hint light" id="vaultInfo"></div>
@@ -497,11 +506,10 @@ body.dark #logoutBtn:hover{color:#fca5a5;background:#7f1d1d}
       <div class="vault-top"><button class="eicon" id="menuBtn" data-icon="menu" title="Menu"></button><h1>Vault</h1><span style="flex:1"></span><button class="eicon" id="themeBtn" data-icon="moon" title="Dark mode"></button><span style="position:relative"><button class="bw-add" id="addBtn">+ Add</button><div id="addMenu" class="hidden"><button data-add="login"><span class="nic" data-icon="globe"></span>Login</button><button data-add="card"><span class="nic" data-icon="card"></span>Card</button><button data-add="identity"><span class="nic" data-icon="idcard"></span>Identity</button><button data-add="note"><span class="nic" data-icon="note"></span>Note</button><button data-add="sshkey"><span class="nic" data-icon="key"></span>SSH key</button><hr class="add-sep" /><button data-add="folder"><span class="nic" data-icon="folder"></span>Folder</button></div></span><span class="bw-avatar" data-icon="lock"></span><button class="eicon" id="logoutBtn" data-icon="power" title="Log out"></button></div>
       <div class="backup-banner hidden" id="backupBanner"><span class="grow">Weekly backup due — download your encrypted backup to restore in any browser.</span><button class="bw-mini" id="bannerDl">Download</button><button class="bw-mini ghost" id="bannerLater">Later</button></div>
       <div class="search"><span>🔍</span><input id="search" type="text" placeholder="Search vault" /><button id="searchClear" class="hidden" title="Clear">⊗</button></div>
-      <div class="bulkbar hidden" id="bulkBar"><span id="bulkCount"></span><span style="flex:1"></span><button class="txtbtn" id="bulkBin">Move to Bin</button><button class="txtbtn dim" id="bulkClear">Clear</button></div>
-      <div class="col-head"><input type="checkbox" id="selAll" title="Select all" /><span class="ch-name"><select id="sortSel" title="Sort"><option value="name-asc">Name A–Z</option><option value="name-desc">Name Z–A</option><option value="updated">Recently updated</option><option value="created">Recently added</option></select></span><span class="ch-owner">Owner</span><span class="ch-opts" id="colOpts">Options</span></div>
+      <div class="col-head"><span class="ch-name"><select id="sortSel" title="Sort"><option value="name-asc">Name A–Z</option><option value="name-desc">Name Z–A</option><option value="updated">Recently updated</option><option value="created">Recently added</option></select></span><span style="flex:1"></span><span id="colOpts"></span></div>
       <div id="entryList"></div>
     </section>
-    <section class="detail hidden" id="detail"></section>
+    <section class="detail empty" id="detail"></section>
 </div>
 
 <!-- ENTRY MODAL -->
@@ -708,10 +716,12 @@ function scorePass(p){let s=0;if(!p)return 0;if(p.length>=8)s+=20;if(p.length>=1
 function paintBar(el,p){const s=scorePass(p);el.style.width=s+'%';el.style.background=s<40?'var(--red)':s<70?'var(--yellow)':'var(--green)';}
 function strengthColor(s){return s<40?'#dc2626':s<70?'#d97706':'#16a34a';}
 function faviconColor(name){let h=0;for(const c of (name||'?'))h=(h*31+c.charCodeAt(0))>>>0;const hues=[217,190,160,330,150,25,265,200];return `hsl(${hues[h%hues.length]} 60% 35%)`;}
+function faviconUrl(e){if((e.type||'login')!=='login')return '';try{const host=new URL((e.urls&&e.urls[0])||e.url||'').hostname;if(!host||!host.includes('.'))return '';return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=64`;}catch{return '';}}
 /* ============ SVG outline icons (Bitwarden-style, currentColor) ============ */
 const SW='fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
 const ICONS={
 copy:`<svg viewBox="0 0 24 24" ${SW}><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>`,
+edit:`<svg viewBox="0 0 24 24" ${SW}><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>`,
 eye:`<svg viewBox="0 0 24 24" ${SW}><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>`,
 eyeOff:`<svg viewBox="0 0 24 24" ${SW}><path d="M17.94 17.94A10.6 10.6 0 0 1 12 19c-6.5 0-10-7-10-7a17.6 17.6 0 0 1 4.06-4.94M9.9 4.24A10.6 10.6 0 0 1 12 5c6.5 0 10 7 10 7a17.7 17.7 0 0 1-2.16 3.19M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M3 3l18 18"/></svg>`,
 trash:`<svg viewBox="0 0 24 24" ${SW}><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
@@ -843,7 +853,7 @@ async function boot(){
   }catch{clearSession();}
 }
 let MASTER_KEY=null, VAULT={entries:[],folders:[]}, META={};
-let filter='all', folderFilter=null, selectedId=null, searchQ='', sortMode='name-asc', selSet=new Set();
+let filter='all', folderFilter=null, selectedId=null, searchQ='', sortMode='name-asc';
 
 /* ============ lock / unlock ============ */
 function refreshLock(){
@@ -980,7 +990,7 @@ function enterApp(){
   }
 }
 function lock(){
-  MASTER_KEY=null;VAULT={entries:[],folders:[]};selectedId=null;selSet.clear();clearSession();
+  MASTER_KEY=null;VAULT={entries:[],folders:[]};selectedId=null;clearSession();
   $('appView').classList.add('hidden');$('lockView').classList.remove('hidden');
   refreshLock();toast('Locked');
 }
@@ -998,30 +1008,11 @@ $('menuBtn').onclick=()=>{
 };
 
 /* ============ rendering ============ */
-document.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>{document.querySelectorAll('.nav-item,.folder-row').forEach(x=>x.classList.remove('active'));n.classList.add('active');filter=n.dataset.f;folderFilter=null;selectedId=null;selSet.clear();closeDrawer();renderAll();});
+document.querySelectorAll('.nav-item').forEach(n=>n.onclick=()=>{document.querySelectorAll('.nav-item,.folder-row').forEach(x=>x.classList.remove('active'));n.classList.add('active');filter=n.dataset.f;folderFilter=null;selectedId=null;closeDrawer();renderAll();});
 $('search').addEventListener('input',e=>{searchQ=e.target.value.toLowerCase();$('searchClear').classList.toggle('hidden',!e.target.value);renderList();});
 $('searchClear').onclick=()=>{$('search').value='';searchQ='';$('searchClear').classList.add('hidden');renderList();$('search').focus();};
-/* table header: sort + select-all + bulk actions (Bitwarden-style) */
 $('sortSel').onchange=()=>{sortMode=$('sortSel').value;renderList();};
-$('selAll').onclick=()=>{
-  const ids=visibleEntries().map(e=>e.id);
-  if(ids.every(id=>selSet.has(id)))selSet.clear();else ids.forEach(id=>selSet.add(id));
-  renderList();
-};
-$('bulkClear').onclick=()=>{selSet.clear();renderList();};
-$('bulkBin').onclick=()=>{
-  if(!selSet.size)return;
-  if(filter==='trash'){
-    if(!confirm(`Permanently delete ${selSet.size} selected logins? This cannot be undone.`))return;
-    VAULT.entries=VAULT.entries.filter(e=>!selSet.has(e.id));
-  }else{
-    if(!confirm(`Move ${selSet.size} selected logins to Bin?`))return;
-    VAULT.entries.forEach(e=>{if(selSet.has(e.id)){e.trashed=true;e.trashedAt=Date.now();e.updatedAt=Date.now();}});
-  }
-  if(selectedId&&selSet.has(selectedId))selectedId=null;
-  selSet.clear();persist().then(renderAll);
-};
-document.addEventListener('click',()=>{document.querySelectorAll('.rowmenu').forEach(m=>m.classList.add('hidden'));if($('addMenu'))$('addMenu').classList.add('hidden');});
+document.addEventListener('click',()=>{if($('addMenu'))$('addMenu').classList.add('hidden');});
 $('addFolderBtn').onclick=()=>{
   const name=prompt('Folder name:');if(!name||!name.trim())return;
   VAULT.folders.push({id:uid(),name:name.trim()});persist().then(renderAll);
@@ -1075,7 +1066,7 @@ function renderFolders(){
     const d=document.createElement('div');d.className='folder-row'+(folderFilter===f.id?' active':'');
     d.innerHTML=`<span class="nic">${icon('folder')}</span><span>${esc(f.name)}</span><span class="count" style="margin-left:auto;font-size:12px">${n}</span>`;
     d.title='Double-click to rename / right-click to delete';
-    d.onclick=()=>{document.querySelectorAll('.nav-item,.folder-row').forEach(x=>x.classList.remove('active'));d.classList.add('active');filter='all';folderFilter=f.id;selSet.clear();closeDrawer();renderList();renderDetail();};
+    d.onclick=()=>{document.querySelectorAll('.nav-item,.folder-row').forEach(x=>x.classList.remove('active'));d.classList.add('active');filter='all';folderFilter=f.id;closeDrawer();renderList();renderDetail();};
     d.ondblclick=()=>{const v=prompt('Rename folder:',f.name);if(v&&v.trim()){f.name=v.trim();persist().then(renderAll);}};
     d.oncontextmenu=ev=>{ev.preventDefault();if(confirm(`Delete folder "${f.name}"? Logins move to No Folder.`)){VAULT.entries.forEach(e=>{if(e.folderId===f.id)e.folderId=null;});VAULT.folders=VAULT.folders.filter(x=>x.id!==f.id);if(folderFilter===f.id)folderFilter=null;persist().then(renderAll);}};
     box.appendChild(d);
@@ -1084,9 +1075,9 @@ function renderFolders(){
 }
 function renderList(){
   const arr=visibleEntries(),box=$('entryList');box.innerHTML='';
-  $('colOpts').innerHTML=(filter==='trash'&&arr.length)?`<button class="txtbtn" id="emptyTrash">Empty bin</button>`:'Options';
-  if($('emptyTrash'))$('emptyTrash').onclick=()=>{if(confirm(`Permanently delete all ${arr.length} items in Bin? This cannot be undone.`)){VAULT.entries=VAULT.entries.filter(e=>!e.trashed);selectedId=null;selSet.clear();persist().then(renderAll);toast('Bin emptied');}};
-  if(!arr.length){box.innerHTML='<div class="empty"><div class="big">🔑</div><p>No items here.<br>Click <b>+ Add</b> to add your first login.</p></div>';updateBulk();return;}
+  $('colOpts').innerHTML=(filter==='trash'&&arr.length)?`<button class="txtbtn" id="emptyTrash">Empty bin</button>`:'';
+  if($('emptyTrash'))$('emptyTrash').onclick=()=>{if(confirm(`Permanently delete all ${arr.length} items in Bin? This cannot be undone.`)){VAULT.entries=VAULT.entries.filter(e=>!e.trashed);selectedId=null;persist().then(renderAll);toast('Bin emptied');}};
+  if(!arr.length){box.innerHTML='<div class="empty"><div class="big">🔑</div><p>No items here.<br>Click <b>+ Add</b> to add your first login.</p></div>';return;}
   if(selectedId&&!arr.find(e=>e.id===selectedId))selectedId=null;
   /* NOTE: no auto-open — the side panel opens only when a row is clicked (Bitwarden-style) */
   for(const e of arr){
@@ -1096,20 +1087,13 @@ function renderList(){
     const menu=e.trashed
       ?`<button data-m="restore"><span class="nic">${icon('restore')}</span>Restore</button><button data-m="purge" class="danger"><span class="nic">${icon('trash')}</span>Delete forever</button>`
       :`<button data-m="view"><span class="nic">${icon('eye')}</span>View details</button><button data-m="secret"><span class="nic">${icon('copy')}</span>${copyLbl}</button>${t==='login'?`<button data-m="user"><span class="nic">${icon('copy')}</span>Copy username</button>`:''}<button data-m="dup"><span class="nic">${icon('copy')}</span>Duplicate</button><button data-m="bin" class="danger"><span class="nic">${icon('trash')}</span>Move to Bin</button>`;
-    d.innerHTML=`<input type="checkbox" ${selSet.has(e.id)?'checked':''} title="Select" /><div class="avatar" style="background:${faviconColor(e.name)}">${esc((e.name||'?')[0])}</div><div class="etxt"><div class="nm">${esc(e.name||'(no name)')}${e.favorite?' <span class="fav">★</span>':''}${((e.type||'login')==='login'&&e.password)?`<span class="sdot" style="background:${strengthColor(scorePass(e.password))}" title="Password strength ${scorePass(e.password)}%"></span>`:''}</div><div class="un">${esc(entrySub(e))} · ${ETYPES[t]}</div></div><div class="eacts"><button class="eicon" data-copy title="${copyLbl}">${icon('copy')}</button><button class="eicon" data-menu title="Options">⋮</button><button class="eicon danger" data-del title="${e.trashed?'Delete forever':'Move to Bin'}">${icon('trash')}</button></div><div class="rowmenu hidden">${menu}</div>`;
+    const fav=faviconUrl(e);
+    d.innerHTML=`<div class="avatar" style="background:${faviconColor(e.name)}">${fav?`<img src="${esc(fav)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:esc((e.name||'?')[0])}</div><div class="etxt"><div class="nm">${esc(e.name||'(no name)')}${e.favorite?' <span class="fav">★</span>':''}${((e.type||'login')==='login'&&e.password)?`<span class="sdot" style="background:${strengthColor(scorePass(e.password))}" title="Password strength ${scorePass(e.password)}%"></span>`:''}</div><div class="un">${esc(entrySub(e))}</div></div>`;
     d.onclick=()=>{selectedId=e.id;renderList();renderDetail();};
-    d.querySelector('input[type=checkbox]').onclick=ev=>{ev.stopPropagation();selSet.has(e.id)?selSet.delete(e.id):selSet.add(e.id);renderList();};
-    d.querySelector('[data-copy]').onclick=ev=>{ev.stopPropagation();copyText(entrySecret(e));};
-    d.querySelector('[data-del]').onclick=ev=>{ev.stopPropagation();rowAction(e,e.trashed?'purge':'bin');};
-    const menuEl=d.querySelector('.rowmenu');
-    d.querySelector('[data-menu]').onclick=ev=>{ev.stopPropagation();const was=menuEl.classList.contains('hidden');document.querySelectorAll('.rowmenu').forEach(m=>m.classList.add('hidden'));if(was)menuEl.classList.remove('hidden');};
-    menuEl.querySelectorAll('[data-m]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();rowAction(e,b.dataset.m);});
     box.appendChild(d);
   }
   box.querySelectorAll('.nm,.un').forEach(el=>{el.title=el.textContent;});
-  const visible=arr.map(e=>e.id);
-  $('selAll').checked=visible.length>0&&visible.every(id=>selSet.has(id));
-  updateBulk();
+
 }
 function duplicateEntry(e){
   const copy=JSON.parse(JSON.stringify(e));
@@ -1119,22 +1103,7 @@ function duplicateEntry(e){
   VAULT.entries.push(copy);selectedId=copy.id;
   persist().then(renderAll);openEntryModal(copy);toast('Duplicated — edit and save');
 }
-function rowAction(e,act){
-  document.querySelectorAll('.rowmenu').forEach(m=>m.classList.add('hidden'));
-  if(act==='view'){selectedId=e.id;renderList();renderDetail();}
-  else if(act==='dup')duplicateEntry(e);
-  else if(act==='user')copyText(e.username||'');
-  else if(act==='secret')copyText(entrySecret(e));
-  else if(act==='bin'){if(!confirm(`Move "${e.name||'(no name)'}" to Bin?`))return;e.trashed=true;e.trashedAt=Date.now();e.updatedAt=Date.now();if(selectedId===e.id)selectedId=null;persist().then(renderAll);toast('Moved to Bin');}
-  else if(act==='restore'){e.trashed=false;persist().then(renderAll);}
-  else if(act==='purge'){if(confirm('Permanently delete this login?')){VAULT.entries=VAULT.entries.filter(x=>x.id!==e.id);if(selectedId===e.id)selectedId=null;persist().then(renderAll);}}
-}
-function updateBulk(){
-  const n=selSet.size,bar=$('bulkBar');
-  bar.classList.toggle('hidden',!n);
-  $('bulkCount').textContent=n?`${n} selected`:'';
-  $('bulkBin').textContent=filter==='trash'?'Delete forever':'Move to Bin';
-}
+
 function folderName(id){return VAULT.folders.find(f=>f.id===id)?.name||'No folder';}
 /* website URI rows for the detail view (avoids nested template literals) */
 function uriRowsHtml(e){
@@ -1149,8 +1118,8 @@ function uriRowsHtml(e){
 }
 function renderDetail(){
   const box=$('detail'),e=VAULT.entries.find(x=>x.id===selectedId);
-  if(!e){box.classList.add('hidden');box.innerHTML='';return;}
-  box.classList.remove('hidden');
+  if(!e){box.classList.add('empty');box.innerHTML=`<div class="detail-empty"><div class="big">LocalVault</div><p>Select an item to view details</p></div>`;return;}
+  box.classList.remove('empty');
   const t=e.type||'login', card=e.card||{}, idn=e.idn||{}, ssh=e.ssh||{};
   const digits=(card.number||'').replace(/\D/g,'');
   const cardMasked=digits.length>4?'•••• •••• •••• '+digits.slice(-4):'••••••••';
@@ -1190,8 +1159,8 @@ function renderDetail(){
   ${e.history?.length?`<div class="bw-sect">Password history (${e.history.length})</div><div class="bw-card">${e.history.map((h,i)=>`<div class="bw-row"><div class="grow"><div class="bw-lab">${new Date(h.changedAt).toLocaleString()}</div><div class="bw-val" id="hist-${i}">••••••••</div></div><button class="eicon" data-hshow="${i}" title="Show/hide">${icon('eye')}</button><button class="eicon" data-hcopy="${i}" title="Copy">${icon('copy')}</button><button class="eicon" data-hrest="${i}" title="Restore this password">${icon('restore')}</button></div>`).join('')}</div>`:''}
   ${e.trashed?`<p class="hint">In Bin since ${new Date(e.trashedAt||e.updatedAt||Date.now()).toLocaleDateString()} — permanently deleted automatically after 30 days.</p>`:''}
   <div class="bw-foot">
-    ${e.trashed?`<button class="bw-edit" id="dRestore">Restore</button><button class="bw-trash" id="dPurge" title="Delete forever">${icon('trash')}</button>`
-    :`<button class="bw-edit" id="dEdit">Edit</button><button class="bw-edit" id="dDup">Duplicate</button><button class="bw-trash" id="dTrash" title="Move to bin">${icon('trash')}</button>`}
+    ${e.trashed?`<div class="bw-foot-left"><button class="bw-action" id="dRestore">${icon('restore')}<span>Restore</span></button></div><button class="bw-action danger" id="dPurge" title="Delete forever">${icon('trash')}<span>Delete forever</span></button>`
+    :`<div class="bw-foot-left"><button class="bw-action" id="dEdit">${icon('edit')}<span>Edit</span></button><button class="bw-action" id="dDup">${icon('copy')}<span>Duplicate</span></button></div><button class="bw-action danger" id="dTrash" title="Move to bin">${icon('trash')}<span>Delete</span></button>`}
   </div>`;
   let shown=false, hideH=null;
   const needAuth=e.reprompt===true;
@@ -1422,9 +1391,6 @@ $('genBtn').onclick=()=>{$('genModal').classList.remove('hidden');fillIconsIn($(
 $('impNav').onclick=()=>{closeDrawer();doImportPick();};
 $('expNav').onclick=()=>{document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));$('expNav').classList.add('active');$('expSub').classList.toggle('hidden');};
 $('expSubJson').onclick=()=>{closeDrawer();doExportJson();};
-$('expSubCopy').onclick=()=>{closeDrawer();doCopyExportJson();};
-$('expSubCsv').onclick=()=>{closeDrawer();doExportCsv();};
-$('expSubXls').onclick=()=>{closeDrawer();doExportXls();};
 $('gClose').onclick=()=>$('genModal').classList.add('hidden');
 $('gNew').onclick=regen;$('gLen').oninput=()=>{$('gLenVal').textContent=$('gLen').value;regen();};
 ['gUpper','gLower','gDigits','gSymbols','gMinD','gMinS','gWords','gSep','gCap','gAmb'].forEach(id=>{$(id).onchange=regen;$(id).oninput=regen;});
@@ -1506,7 +1472,7 @@ async function restoreAutoSlot(i){
     catch{const pw=prompt('This snapshot was taken under a different master password. Enter it:');if(!pw)return;data=await decryptVault(await deriveKey(pw,s.salt,s.iterations),s);}
     if(!Array.isArray(data.entries))throw new Error('bad snapshot');
     if(!confirm(`Restore snapshot from ${new Date(s.takenAt).toLocaleString()} with ${data.entries.length} logins? The current vault will be replaced.`))return;
-    VAULT=data;selectedId=null;filter='all';folderFilter=null;selSet.clear();
+    VAULT=data;selectedId=null;filter='all';folderFilter=null;
     await persist();renderAll();toast('Restored from automatic backup');
   }catch{toast('Restore failed — wrong password?');}
 }
@@ -1633,12 +1599,12 @@ function parseCsv(text){
   if(cur.length>1||cur[0]!=='')rows.push(cur);
   return rows.filter(r=>r.some(x=>x.trim()!==''));
 }
-const COLMAP={type:['type','item type','kind'],name:['name','title','account'],username:['username','user','email','login_username','login username'],password:['password','pass','login_password','login password'],url:['url','link','website','login_uri','login uri'],totp:['totp','2fa','authenticator'],notes:['notes','note','comments'],folder:['folder','group','collection'],favorite:['favorite','fav','star'],cardholder:['cardholder','card holder','name on card'],cardnumber:['cardnumber','card number','number','cc'],cardexp:['cardexp','expiry','exp','expires'],cardcvv:['cardcvv','cvv','cvc'],firstname:['firstname','first name','fname'],lastname:['lastname','last name','lname'],email:['email','e-mail'],phone:['phone','tel','mobile'],address:['address','street'],sshpub:['sshpub','ssh public','public key','ssh public key'],sshpriv:['sshpriv','ssh private','private key','ssh private key'],sshpass:['sshpass','ssh passphrase','passphrase','key passphrase'],custom:['custom','custom fields','fields']};
+const COLMAP={type:['type','item type','kind'],name:['name','title','account'],username:['username','user','email','login_username','login username'],password:['password','pass','login_password','login password'],url:['url','link','website','login_uri','login uri'],totp:['totp','login_totp','2fa','authenticator'],notes:['notes','note','comments'],folder:['folder','group','collection'],favorite:['favorite','fav','star'],cardholder:['cardholder','card holder','name on card'],cardnumber:['cardnumber','card number','number','cc'],cardexp:['cardexp','expiry','exp','expires'],cardcvv:['cardcvv','cvv','cvc'],firstname:['firstname','first name','fname'],lastname:['lastname','last name','lname'],email:['email','e-mail'],phone:['phone','tel','mobile'],address:['address','street'],sshpub:['sshpub','ssh public','public key','ssh public key'],sshpriv:['sshpriv','ssh private','private key','ssh private key'],sshpass:['sshpass','ssh passphrase','passphrase','key passphrase'],custom:['custom','custom fields','fields']};
 function mapRow(h,row){
   const get=(...keys)=>{for(const k of keys){const i=h.indexOf(k);if(i>=0&&row[i]!==undefined)return row[i].trim();}return '';};
   const pick=aliases=>{for(const a of aliases){const v=get(a);if(v)return v;}return '';};
   const ty=(pick(COLMAP.type)||'login').toLowerCase();
-  const type=['login','card','identity','note','sshkey'].includes(ty)?ty:'login';
+  const type=ty==='secure note'?'note':['login','card','identity','note','sshkey'].includes(ty)?ty:'login';
   let custom=[];try{const c=JSON.parse(pick(COLMAP.custom)||'[]');if(Array.isArray(c))custom=c.filter(f=>f&&(f.n||f.v)).map(f=>({n:String(f.n||''),v:String(f.v||''),h:!!f.h}));}catch{}
   return {type,name:pick(COLMAP.name)||'(imported)',username:pick(COLMAP.username),password:pick(COLMAP.password),url:pick(COLMAP.url),totp:pick(COLMAP.totp).replace(/\s/g,''),notes:pick(COLMAP.notes),folder:pick(COLMAP.folder),favorite:/^(1|y|yes|true|\*|\u2605)/i.test(pick(COLMAP.favorite)),
     card:{holder:pick(COLMAP.cardholder),number:pick(COLMAP.cardnumber).replace(/\s/g,''),exp:pick(COLMAP.cardexp),cvv:pick(COLMAP.cardcvv)},
@@ -1664,7 +1630,16 @@ $('impAnyFile').onchange=async ev=>{
     let raw=[];
     if(/\.json$/i.test(f.name)||t.trim().startsWith('{')){
       const j=JSON.parse(text);
-      raw=(j.entries||j.logins||[]).map(r=>({type:['login','card','identity','note','sshkey'].includes((r.type||'').toLowerCase())?r.type.toLowerCase():'login',name:r.name||r.title||'(imported)',username:r.username||r.login_username||'',password:r.password||r.login_password||'',url:r.url||r.login_uri||((r.urls||[])[0]||''),urls:Array.isArray(r.urls)?r.urls.filter(u=>typeof u==='string').map(u=>u.trim()).filter(Boolean).slice(0,5):(r.url||r.login_uri?[r.url||r.login_uri]:[]),totp:(r.totp||'').replace(/\s/g,''),notes:r.notes||'',folder:'',favorite:!!r.favorite,reprompt:!!r.reprompt,card:r.card||{holder:'',number:'',exp:'',cvv:''},idn:r.idn||{first:'',last:'',email:'',phone:'',address:''},ssh:{pub:(r.ssh||{}).pub||'',priv:(r.ssh||{}).priv||'',pass:(r.ssh||{}).pass||''},custom:Array.isArray(r.custom)?r.custom:[]}));
+      const bitwarden=Array.isArray(j.items);
+      const folders=new Map((j.folders||[]).map(x=>[x.id,x.name]));
+      const items=j.entries||j.logins||j.items||[];
+      raw=items.map(r=>{
+        const login=r.login||{};
+        const uris=Array.isArray(login.uris)?login.uris.map(x=>x&&x.uri).filter(Boolean):[];
+        const type=bitwarden?({1:'login',2:'note',3:'card',4:'identity'}[r.type]||'login'):(['login','card','identity','note','sshkey'].includes((r.type||'').toLowerCase())?r.type.toLowerCase():'login');
+        const card=r.card||{};const idn=r.identity||r.idn||{};
+        return {type,name:r.name||r.title||'(imported)',username:login.username||r.username||r.login_username||'',password:login.password||r.password||r.login_password||'',url:uris[0]||r.url||r.login_uri||((r.urls||[])[0]||''),urls:uris.length?uris.slice(0,5):Array.isArray(r.urls)?r.urls.filter(u=>typeof u==='string').slice(0,5):[],totp:(login.totp||r.totp||'').replace(/\s/g,''),notes:r.notes||'',folder:folders.get(r.folderId)||r.folder||'',favorite:!!r.favorite,reprompt:!!r.reprompt,card:{holder:card.cardholder||card.holder||'',number:card.number||'',exp:card.expirationMonth&&card.expirationYear?`${card.expirationMonth}/${card.expirationYear}`:card.exp||'',cvv:card.code||card.cvv||''},idn:{first:idn.firstName||idn.first||'',last:idn.lastName||idn.last||'',email:idn.email||'',phone:idn.phone||'',address:idn.address1||idn.address||''},ssh:{pub:(r.ssh||{}).pub||'',priv:(r.ssh||{}).priv||'',pass:(r.ssh||{}).pass||''},custom:Array.isArray(r.custom)?r.custom:[]};
+      });
     }else{
       const rows=parseCsv(text);if(rows.length<2)throw new Error('CSV is empty');
       const h=rows[0].map(c=>c.trim().toLowerCase());
@@ -1776,7 +1751,7 @@ $('healthBtn').onclick=()=>{
   html+=sec('yellow','Reused passwords',reused.length?reused.length+' groups':0,reused.length?reused.map(g=>`<div class="rep-group">Same password in ${g.length} logins:</div>`+g.map(e=>row(e,uname(e))).join('')).join(''):ok('No reused passwords — nice.'));
   html+=sec('blue','Untouched for 1+ year',old.length,old.length?old.map(e=>row(e,`Last changed ${new Date(e.updatedAt||e.createdAt||Date.now()).toLocaleDateString()} — ${uname(e)}`)).join(''):ok('Everything recently updated — nice.'));
   $('healthBody').innerHTML=html;
-  $('healthBody').querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{selectedId=b.dataset.view;filter='all';folderFilter=null;selSet.clear();document.querySelectorAll('.nav-item,.folder-row').forEach(x=>x.classList.remove('active'));document.querySelector('.nav-item').classList.add('active');renderAll();$('healthModal').classList.add('hidden');});
+  $('healthBody').querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{selectedId=b.dataset.view;filter='all';folderFilter=null;document.querySelectorAll('.nav-item,.folder-row').forEach(x=>x.classList.remove('active'));document.querySelector('.nav-item').classList.add('active');renderAll();$('healthModal').classList.add('hidden');});
   fillIconsIn($('healthModal'));
   $('hibpTgl').checked=!!loadMeta().hibp;$('hibpBody').innerHTML='';$('breachPill').textContent='optional';
   $('healthModal').classList.remove('hidden');

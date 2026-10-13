@@ -8,7 +8,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const HOST = process.env.LOCALVAULT_HOST || '127.0.0.1';
+const HOST = '127.0.0.1';
 const PORT = parseInt(process.env.LOCALVAULT_PORT || '18765', 10);
 const FILE = path.join(__dirname, '..', 'LocalVault.html');
 const STORE_FILE = path.join(__dirname, 'vault.store.json');
