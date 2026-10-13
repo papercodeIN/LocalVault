@@ -2,7 +2,7 @@
 """
 Copy built firmware binaries to web-flash directory for ESP Web Tools.
 Creates both production (non-dated) and archived (dated) versions.
-Run after: pio run -e esp32 -e esp32c3 -e d1_mini -e pico_w
+Run after: pio run -e esp32 -e esp32c3 -e d1_mini
 """
 import os
 import shutil
@@ -24,7 +24,6 @@ FIRMWARE_MAP = {
     ],
     'esp32c3': [('firmware.bin', 'firmware_esp32c3.bin')],
     'd1_mini': [('firmware.bin', 'firmware_d1_mini.bin')],
-    'pico_w': [('firmware.uf2', 'firmware_pico_w.uf2')],
 }
 
 def main():
@@ -63,8 +62,8 @@ def main():
         print("\n[OK] manifest.json already in place")
     
     print("\nDone! Firmware files ready:")
-    print("  - Production: firmware_*.bin/uf2 (for manifest.json)")
-    print(f"  - Archived: firmware_*_{DATE_SUFFIX}.bin/uf2 (for backup)")
+    print("  - Production: firmware_*.bin (for manifest.json)")
+    print(f"  - Archived: firmware_*_{DATE_SUFFIX}.bin (for backup)")
     print("\nServe web-flash/ over HTTPS to use browser flashing.")
     print("Example: python -m http.server 8000 --directory web-flash")
 
